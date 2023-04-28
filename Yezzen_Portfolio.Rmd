@@ -1,0 +1,3586 @@
+--- 
+title: "Yezzen's Course Portfolio"
+author: "Yezzen Khazindar"
+date: "`r Sys.Date()`"
+site: bookdown::bookdown_site
+documentclass: book
+bibliography: [book.bib, packages.bib]
+# url: your book url like https://bookdown.org/yihui/bookdown
+# cover-image: path to the social sharing image like images/cover.jpg
+description: |
+  This is a porfolio of my work in Environmental Data Science for the first half of the semester
+link-citations: yes
+github-repo: rstudio/bookdown-demo
+always_allow_html: true
+---
+
+# About
+
+This is a _sample_ book written in **Markdown**. You can use anything that Pandoc's Markdown supports; for example, a math equation $a^2 + b^2 = c^2$.
+
+## Usage 
+
+Each **bookdown** chapter is an .Rmd file, and each .Rmd file can contain one (and only one) chapter. A chapter *must* start with a first-level heading: `# A good chapter`, and can contain one (and only one) first-level heading.
+
+Use second-level and higher headings within chapters like: `## A short section` or `### An even shorter section`.
+
+The `index.Rmd` file is required, and is also your first book chapter. It will be the homepage when you render the book.
+
+## Render book
+
+You can render the HTML version of this example book without changing anything:
+
+1. Find the **Build** pane in the RStudio IDE, and
+
+1. Click on **Build Book**, then select your output format, or select "All formats" if you'd like to use multiple formats from the same book source files.
+
+Or build the book from the R console:
+
+```{r, eval=FALSE}
+bookdown::render_book()
+```
+
+To render this example to PDF as a `bookdown::pdf_book`, you'll need to install XeLaTeX. You are recommended to install TinyTeX (which includes XeLaTeX): <https://yihui.org/tinytex/>.
+
+## Preview book
+
+As you work, you may start a local server to live preview this HTML book. This preview will update as you edit the book when you save individual .Rmd files. You can start the server in a work session by using the RStudio add-in "Preview book", or from the R console:
+
+```{r eval=FALSE}
+bookdown::serve_book()
+```
+
+
+```{r include=FALSE}
+# automatically create a bib database for R packages
+knitr::write_bib(c(
+  .packages(), 'bookdown', 'knitr', 'rmarkdown'
+), 'packages.bib')
+```
+
+<!--chapter:end:index.Rmd-->
+
+---
+title: "GitHub R Intro Yez"
+output: html_document
+always_allow_html: true
+date: "`r Sys.Date()`"
+---
+
+```{r chapter-title-1, include=FALSE}
+toc.title <- "Chapter 1: GitHub R Intro Yez"
+```
+
+```{r}
+source("Setup.R")
+```
+
+```{r}
+data("penguins")
+
+penguins
+```
+
+```{r}
+# 6.3.1 Exercises
+## 1. Why don’t the following lines of code work? Tweak each one so the code runs
+penguins[["Fruit"]]
+penguins$flipper_length_mm
+penguins[penguins$island =='Dream',]
+
+## 2. How many species are in the penguins dataset? What islands were the data collected for? (Note: the unique() function might help)
+unique(penguins$species) # There are three different species
+unique(penguins$island) # Torgersen, Biscoe, and Dream
+
+## 3. Use indexing to create a new data frame that has only 3 columns: species, island and flipper length columns, and subset all rows for just the ‘Dream’ island.
+penguins[penguins$island=='Dream', c("species", "island", "flipper_length_mm")]
+
+?mean
+
+## 4. Use indexing and the mean() function to find the average flipper length for the Adelie species on Dream island. (Note: explore the mean() function and how to deal with NA values).
+index2 <- penguins[penguins$island=='Dream' & penguins$species=='Adelie', c("flipper_length_mm")]
+
+index2
+
+index2 <- index2[1:56,]
+
+mean(index2$flipper_length_mm)
+
+?grep
+?paste
+```
+
+```{r}
+# 6.3.2 Exercises
+## 1. Reorder the variables in penguins so that year is the first column followed by the rest (Hint: look into the use of everything()).
+penguins %>%
+  select(year, everything())
+
+## 2. Create a new column called ‘size_group’ where individuals with body mass greater than the overall average are called ‘large’ and those smaller are called ‘small’.
+
+bodyMassAvg <- mean(penguins$body_mass_g, na.rm=TRUE)
+penguins %>% 
+  mutate(size_group = if_else(body_mass_g >= bodyMassAvg,
+                              paste('large'),
+                              paste('small')))
+
+## 3. Find out which year for each species were individuals on average the largest according to body mass.
+penguins %>% 
+  group_by(species, year) %>% 
+  summarize(bodyMassAvg = mean(body_mass_g, na.rm=TRUE)) %>% 
+  filter(bodyMassAvg == max(bodyMassAvg))
+
+## 4. You want to filter data for years that are not in a vector of given years, but this code doesn’t work. Tweak it so that it does. (Yes, you could just filter year to equal 2007 in this case but there is a trouble-shooting lessons here).
+
+penguins %>% 
+  filter(year != c(2008, 2009))
+```
+
+```{r}
+# 7.1 Exercises
+## 1. Make a barplot showing the average flipper length for each species.
+
+penguins %>% 
+  group_by(species) %>% 
+  summarize(avgFlipperLen = mean(flipper_length_mm, na.rm=TRUE)) %>% 
+  ggplot() +
+    geom_col(mapping = aes(x=species, y=avgFlipperLen, fill=species)) +
+    ylab("Average Flipper Length (mm)")
+
+#ggplot(penguins) +
+ # geom_bar(mapping = aes(x = mean(flipper_length_mm, na.rm=TRUE), fill = species))
+  
+## 2. Make a scatter plot of bill length compared to bill depth but only for observations on the Dream island.
+?ggplot
+
+penguins %>% 
+  filter(island == 'Dream') %>%
+ggplot() +
+  geom_point(mapping = aes(x=bill_depth_mm, y=bill_length_mm))
+```
+
+<!--chapter:end:1.1_R-Basics.Rmd-->
+
+---
+title: "Debugging_Demo"
+author: "Matt Ross"
+date: "2023-01-23"
+output: html_document
+always_allow_html: true
+---
+
+```{r chapter-title-2, include=FALSE}
+toc.title <- "Chapter 2.1: Debugging_Demo"
+```
+
+```{r setup-1, include=FALSE}
+library(tidyverse)
+library(dataRetrieval)
+library(lubridate)
+```
+
+# Poudre River 
+
+Yes, another option to download the discharge data from the Poudre River in Fort Collins using the R programming language is to use the dataRetrieval package. This package contains functions to access and retrieve data from various sources including the USGS National Water Information System (NWIS) which is the database used to store and retrieve water data, such as discharge data.
+
+First, you will need to install the dataRetrieval package by running the following command: install.packages("dataRetrieval")
+
+Next, you will need to load the package into your R session using the command library(dataRetrieval)
+
+You can then use the readNWISdv() function to retrieve the data from the NWAL site.
+
+poudre_data <- readNWISdv(siteNumber = "09174500", parameterCd = "00060", startDT = "1990-01-01", endDT = "2021-12-31")
+
+The function takes four parameters, siteNumber, parameterCd, startDT, and endDT. SiteNumber is the unique identifier of the site, parameterCd is the code that represents the parameter of interest, and startDT and endDT are the start and end dates for the data retrieval.
+
+Once you have downloaded the data, you can use the various functions in the tidyverse package to manipulate and analyze the data.
+
+You can also use the ggplot2 package, which is also a part of the tidyverse to create visualizations of the data.
+
+As before, you might want to check the format of the data before analyzing it, and check if there are missing values or other issues to clean it before visualizing or doing any analysis.
+
+Keep in mind that data availability and the format can change over time, so you may want to check the USGS website or the data documentation to ensure that you are using the most up-to-date data.
+
+## Data Download
+
+### Download Poudre River Data
+
+
+```{r}
+
+
+poudre_data <- readNWISdv(siteNumbers = "06752260",
+                          parameterCd = "00060", 
+                          startDate = "1990-01-01", 
+                          endDate = Sys.Date())  %>%
+  addWaterYear(.) %>%
+  select(date = Date,
+         year = waterYear,
+         q_cfs = X_00060_00003)
+  
+
+
+
+```
+
+
+Once you have downloaded and cleaned the discharge data for the Poudre River in Fort Collins, you can use various techniques to analyze the data and see if the minimum discharge has changed over the past 30 years. Here are a few examples of how you could do this using R:
+
+One way to analyze the data would be to calculate the minimum discharge for each year, and then plot the results to visualize any trends or changes over time. You can use the dplyr package to group the data by year, and then use the summarize() function to calculate the minimum discharge for each year. For example:
+
+## Analyzing data
+
+### Annual Minimum Discharge
+
+```{r summarize}
+
+
+poudre_data_by_year <- poudre_data %>%
+  group_by(year) %>%
+  summarize(min_q = min(q_cfs, na.rm = T))
+
+```
+
+
+
+Once you have the data grouped by year, you can use the ggplot2 package to create a line plot of the minimum discharge over time. For example:
+
+### Line Plot
+
+```{r}
+
+ggplot(poudre_data_by_year, aes(x = year, y = min_q)) +
+  geom_line() +
+  ggtitle("Minimum Discharge for Poudre River over Time") +
+  ylab('Minimum Q (cfs)') + 
+  xlab('Year')
+
+```
+
+
+### Point Plot
+
+```{r}
+ggplot(poudre_data_by_year, aes(x = year, y = min_q)) +
+  geom_point() +
+  ggtitle("Minimum Discharge for Poudre River over Time") +
+  ylab('Minimum Q (cfs)') + 
+  xlab('Year')
+
+```
+
+
+### Annual 5th percentiles
+
+```{r}
+  
+poudre_data_by_year <- poudre_data %>%
+  group_by(year) %>%
+  summarize(fifth_percentile_flow = quantile(q_cfs, 0.05, na.rm = T))
+
+
+```
+
+
+#### Point 5th percentile
+
+```{r}
+ggplot(poudre_data_by_year, aes(x = year, y = fifth_percentile_flow)) +
+  geom_point() +
+  ggtitle("5th percentile Discharge for Poudre River over Time") +
+  ylab('5% Q (cfs)') + 
+  xlab('Year') +
+  scale_y_log10()
+```
+
+
+### Annual Maximum
+
+
+```{r}
+poudre_data_by_year <- poudre_data %>%
+  group_by(year) %>%
+  summarize(ninety_fifth_percentile_flow = quantile(q_cfs, 0.95, na.rm = T))
+```
+
+
+```{r}
+ggplot(poudre_data_by_year, aes(x = year, y = ninety_fifth_percentile_flow)) +
+  geom_point() +
+  ggtitle("95th percentile Discharge for Poudre River over Time") +
+  ylab('95% Q (cfs)') +
+  xlab('Year') 
+```
+
+
+
+
+
+<!--chapter:end:2.1_raw_gpt_output.Rmd-->
+
+---
+title: "Tidying Public Water Quality Data, and then Breaking Code!"
+author: "Yezzen Khazindar"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output: 
+  html_document:
+    toc:  yes
+    toc_depth:  3
+    toc_float: true
+editor_options: 
+  chunk_output_type: console
+always_allow_html: true
+---
+```{r}
+options(repos = c(CRAN = "https://cran.rstudio.com/"))
+```
+
+```{r chapter-title-3, include=FALSE}
+toc.title <- "Chapter 2.2: Tidying Public Water Quality Data, and then Breaking Code!"
+```
+
+
+# Debugging
+
+Learning how to debug code is a lifelong project, but you have to start somewhere.
+Code can not work for a lot of reasons, finding out why code isn't working as 
+expected is the hardest part of coding, especially when you don't get errors, but 
+instead your data or analysis just is generating incorrect insight. Debugging is the
+formal steps you can take to make this process slightly less annoying. The absolute
+most important part of debugging is carefully reading the error or warning message that
+R is throwing when your code doesn't work. Sometimes I read these messages out loud
+just to slow down my brain and make sure that I'm actually understanding what is 
+breaking. 
+
+This assignment will have two components. First, you will be finding some errors in
+some code that I have intentionally broken. Second, you will be asking ChatGPT to 
+generate some code for you and then making sure it works. 
+
+I think Hadley Wickham's guide is a great place to start for general debugging 
+philosophy. But our class repo has additional links if you want. 
+
+- https://adv-r.hadley.nz/debugging.html
+ 
+- https://github.com/Data-Sci-Intro-2023/Week-2-Debugging
+
+
+
+
+# Why public datasets?
+
+Working with large, open-access datasets can serve many purposes. It can be an excellent way to explore new ideas, before investing in field-work or experiments. It can be a great way to take local or experimental results and expand them to different ecosystems, places, or landscapes. Or it can be an excellent way to build, validate, and test ecological models on regional or national scales. 
+
+So why doesn't everyone use public data? Well, it's often collected by a variety of organizations, with different methods, units, and incosistent metadata. Together these issues with large public datasets, make them "messy." Messy data can be messy in many different ways, but at the basic level it means that data is hard to analyze, not because the data itself is bad, but because the way it is organized is unclear or inconsistent. 
+
+In this lab, we will learn some tricks to "tidying" data, making it analysis-ready. We will depend heavily on the [tidyverse](https://www.tidyverse.org/), an excellent series of packages that make data manipulation beautiful and easy. We will also be working with water quality portal data so we will also use the excellent [dataRetrieval](https://github.com/USGS-R/dataRetrieval) package for downloading data from the Water Quality Portal and the USGS. 
+
+## Loading key packages
+
+This lab is meant to introduce the incredible variety of tools that one can use to clean data, many of these tools are captured by the `tidyverse` meta-package, a package of packages, but there are some additional ones that will help us locate our various water quality sites. 
+
+
+```{r setup-2, warnings='hide',message=FALSE}
+install.packages("mapview")
+install.packages("kableExtra")
+install.packages("ggthemes")
+install.packages("tidyr") ## student: tidyr spelled wrong
+install.packages("dplyr")
+
+library(tidyverse) # Package with dplyr, tibble, readr, and others to help clean coding
+library(dataRetrieval) # Package to download data. 
+library(sf) #Geospatial package to plot and explore data
+library(mapview) #Simple interface to leaflet interactive maps
+library(broom) #Simplifies model outputs
+library(knitr) #Makes nice tables
+library(kableExtra) #Makes even nicer tables
+library(lubridate) #Makes working with dates easier
+library(ggthemes) #Makes plots prettier
+library(tidyr) #Makes multiple simultaneous models easier
+library(dplyr)
+
+
+```
+
+# Downloading data.
+
+For this lab, we'll explore water quality data in the Colorado River basin as it moves from Colorado to Arizona. All data will be generated through the code you see below, with the only external information coming from knowing the SiteID's for the monitoring locations along the Colorado River and the water quality characteristic names. 
+
+
+The water quality portal can be accessed with the command `readWQPdata`, which takes a variety of parameters (like startdate, enddate, constituents, etc...). We'll generate these rules for downloading the data here. 
+
+## Download prep
+
+
+There is one grammatical error here!
+```{r download prep}
+#First we'll make a tibble (a tidyverse table) with Site IDs. Generally these are increasingly downstream of the CO headwaters near Grand Lake. 
+colorado <- tibble(sites=c('USGS-09034500','USGS-09069000'),
+                   basin=c('colorado1','eagle'))
+
+#Now we need to setup a series of rules for downloading data from the Water Quality Portal. 
+#We'll focus on cation and anion data from 1950-present. Each cation has a name that we might typically use like calcium or sulfate, but the name may be different in the water quality portal, so we have to check this website https://www.waterqualitydata.us/Codes/Characteristicname?mimeType=xml to get our names correct. 
+
+paramater.names <- c('ca','mg','na','k','so4','cl','hco3')
+
+ca <- c('Calcium')
+mg <- c('Magnesium')
+na <- 'Sodium'
+k <- 'Potassium'
+so4 <- c('Sulfate','Sulfate as SO4','Sulfur Sulfate','Total Sulfate')
+cl <- 'Chloride'
+hco3 <- c('Alkalinity, bicarbonate','Bicarbonate')
+
+#Compile all these names into a single list
+parameters <- list(ca,mg,na,k,so4,cl,hco3)
+#Name each cation or anion in the list
+names(parameters) <- paramater.names
+#Notice that we aren't downloading any nutrients (P or N) because they are much messier (100s of different ways to measure and report concentration data) than other cation anion data. 
+
+#Start dates
+start <- '1950-10-01'
+end <- '2018-09-30'
+
+#Sample media (no sediment samples)
+sampleMedia = 'Water'
+
+#Comple all this information into a list with arguments
+site.args <- list(siteid=colorado$sites,
+                  sampleMedia=sampleMedia,
+                  startDateLo=start,
+                  startDateHi=end,
+                  characteristicName=NA) #We'll fill this in later in a loop
+
+
+
+```
+
+## Concentration data download
+
+
+```{r concentration download, eval=T}
+conc.list <- list() #Empty list to hold each data download
+
+
+#We'll loop over each anion or cation and download all data at our sites for that constituent
+for(i in 1:length(parameters)){
+  #We need to rename the characteristicName (constituent) each time we go through the loop
+  site.args$characteristicName<-parameters[[i]]
+  
+  #readWQPdata takes in our site.args list and downloads the data according to those rules 
+  # time, constituent, site, etc...
+  
+  # Don't forget about pipes "%>%"! Pipes pass forward the results of a previous command, so that 
+  #You don't have to constantly rename variables. I love them. 
+  
+  conc.list[[i]] <- readWQPdata(site.args) %>%
+    mutate(parameter=names(parameters)[i]) #Mutate just adds a new column to the data frame
+  
+  #Pipes make the above command simple and succinct versus something more complicated like:
+  
+  ## conc.list[[i]] <- readWQPdata(site.args) 
+  ## conc.list[[i]]$parameter <- names(parameters)[i]
+}
+
+
+#bind all this data together into a single data frame
+conc.long <- map_dfr(conc.list,rbind)
+
+
+```
+
+## Site info download
+
+We also need to download some site info so we can know where these sites are. 
+
+
+
+```{r site info download}
+#In addition to concentration informatino, we probably want to know some things about the sites
+#dplyr::select can help us only keep site information that is useful. 
+
+site.info <- whatWQPsites(siteid=colorado$sites) %>%
+  dplyr::select(SiteID=MonitoringLocationIdentifier,
+                  name=MonitoringLocationName, ### Student: missing comma
+                  area=DrainageAreaMeasure.MeasureValue,
+                  area.units=DrainageAreaMeasure.MeasureUnitCode,
+                  lat=LatitudeMeasure,
+                  long=LongitudeMeasure) %>%
+  distinct() #Distinct just keeps the first of any duplicates. 
+
+
+
+```
+
+
+
+# Data tidying
+
+Now that we have downloaded the data we need to tidy it up. The water quality portal data comes with an incredible amount of metadata in the form of extra columns. But we don't need all this extra data. 
+## Look at the data you downloaded.
+
+There are two data types we downloaded. First site info which has things like lat and long, and second concentration data. We already slightly tidied the site info data so that it has sensible column names 
+
+```{r site info}
+head(site.info)
+```
+
+This dataset looks nice because it has all the information we need and nothing extra. Now let's look at the concentration data. 
+
+```{r conc data}
+head(conc.long) %>%
+  kable(.,'html') %>%
+  kable_styling() %>%
+  scroll_box(width='800px,height=300px')
+  
+```
+
+
+## Initial cleaning up
+
+Wow that looks messy! Lots of extraneous columns, lots of NAs, so much information we can hardly parse it. Let's pair it down to the essentials. 
+
+```{r tidying up concentration}
+#This code mostly just grabs and renames the most important data columns
+conc.clean <-  conc.long %>% ### Student: The pipe was missing
+                  dplyr::select(date=ActivityStartDate, ### Student: there was a comma missing here
+                         parameter=CharacteristicName,
+                         units=ResultMeasure.MeasureUnitCode,
+                         SiteID=MonitoringLocationIdentifier,
+                         org=OrganizationFormalName,
+                         org_id=OrganizationIdentifier,
+                         time=ActivityStartTime.Time,
+                         value=ResultMeasureValue,
+                         sample_method=SampleCollectionMethod.MethodName,
+                         analytical_method=ResultAnalyticalMethod.MethodName,
+                         particle_size=ResultParticleSizeBasisText,
+                         date_time=ActivityStartDateTime,
+                         media=ActivityMediaName,
+                         sample_depth=ActivityDepthHeightMeasure.MeasureValue,
+                         sample_depth_unit=ActivityDepthHeightMeasure.MeasureUnitCode,
+                         fraction=ResultSampleFractionText,
+                         status=ResultStatusIdentifier) %>%
+  #Remove trailing white space in labels
+  mutate(units = trimws(units)) %>% ### Student: there was a ')' missing
+  #Keep only samples that are water samples
+  filter(media=='Water') #Some of these snuck through!
+
+```
+
+Now let's look at the tidier version 
+```{r examine tidier data}
+head(conc.clean) %>%
+  kable(.,'html') %>%
+  kable_styling() %>%
+  scroll_box(width='800px', height='300px') ### Student: '' wrong
+```
+
+## Final tidy dataset
+
+Okay that is getting better but we still have lots of extraneous information. For our purposes let's assume that the sample and analytical methods used by the USGS are reasonable and exchangeable (one method is equivalent to the other). If we make that assumption then the only remaining data we need to clean is to make sure that all the data has the same units. 
+
+### Unit Check
+
+```{r unit check}
+table(conc.clean$units) ### Student: change to clean
+```
+
+Wow! Almost all the data is in mg/L. That makes our job really easy. 
+
+We just need to remove these observations with a `dplyr::filter` call and then select an even smaller subset of useful columns, while adding a time object column using the `lubridate::ymd` call. 
+
+```{r tidy}
+#install.packages("dplyr")
+#library(dplyr)
+class(conc.clean$units)
+conc.tidy <- conc.clean %>% 
+  filter(units == 'mg/l') %>% ### Student: change units
+  mutate(date=ymd(date)) %>%
+  select(date,
+         parameter,
+         SiteID,
+         conc=value)
+
+
+```
+
+### Daily data
+
+Okay now we have a manageable data frame. But how do we want to organize the data? Since we are looking at a really long time-series of data (70 years), let's look at data as a daily average. The `dplyr::group_by and summarize` commands make this really easy
+
+```{r daily}
+
+
+#The amazing group_by function groups all the data so that the summary
+#only applies to each subgroup (site, date, and parameter combination).
+#So in the end you get a daily average concentration for each site and parameter type. 
+conc.daily <- conc.tidy %>%
+  group_by(date,parameter,SiteID) %>% 
+  summarize(conc_mean = mean(conc,na.rm=T))
+
+```
+
+Taking daily averages looks like it did eliminate `r nrow(conc.tidy) - nrow(conc.daily)` observations, meaning these site date combinations had multiple observations on the same day. 
+
+
+# Analyzing data
+
+Now we have a 'tidy' dataset. Let's look at the data we have. First where is the data? 
+
+### Map
+
+Here we use the `sf` package to project the site information data into a GIS type data object called a `simple feature (sf)`. The function `st_as_sf` converts the long (x) and lat (y) coordinates into a projected point feature with the EPSG code 4326 (WGS 84). We can then use the `mapview` package and function to look at where these sites are. 
+
+```{r}
+#convert site info as an sf object
+site.sf <- site.info %>%
+  st_as_sf(., coords=c('long','lat'), crs = 4326) ### Student: add crs code and close bracket
+
+  mapview(site.sf)
+
+```
+
+So these sites are generally in the Colorado River Basin with increasing size. 
+
+## Concentration data
+
+Now that we know where the data is coming from let's look at the actual data we downloaded using ggplot2 
+
+
+### Calcium only
+
+To keep the plots simple at first let's look at calcium data by site. 
+
+```{r daily plot}
+
+conc.daily %>%
+  filter(parameter == 'Calcium') %>%
+  ggplot(.,aes(x=date,y=conc_mean)) + 
+  geom_point() + 
+  facet_wrap(~SiteID)
+  
+```
+
+Okay that's a lot of data! Maybe too much. Let's focus in on sites with only continuous datasets and then summarize the data by year
+
+### Annual summaries of full sites
+
+Let's shrink the dataset to only look at annual change. 
+
+```{r annual only}
+
+conc.annual <- conc.daily %>%
+  mutate(year=year(date)) %>%
+  group_by(SiteID,year,parameter) %>%
+  summarize(annual_mean=mean(conc_mean,na.rm=T),
+            annual_var=var(conc_mean,na.rm=T))
+  
+
+```
+
+### Plot of all the annual data.
+
+```{r ugly}
+conc.annual %>%
+  ggplot(.,aes(x=year,y=annual_mean,color=SiteID)) + 
+  geom_point() + 
+  facet_wrap(~parameter,scales='free')
+```
+
+That plot is... ugly! Maybe we can make something prettier
+
+
+### Prettier annual plot. 
+
+Having the points colored by SiteID is not super useful, unless you have memorized the name and location of USGS gauge data. So maybe we can color it by the table we used to download the data? That table `colorado` was organized such that each basin had it's own name or was increasing in basin size. That's a better way to think about the data than as SiteID names. So let's use `join` functions to join the datasets and use the basin names. We'll also use the package `ggthemes` to try and make the plots prettier. 
+
+
+```{r pretty,fig.width=9,fig.height=7}
+conc.annual %>%
+  left_join(colorado %>%
+              rename(SiteID=sites),by='SiteID') %>%
+  ggplot(.,aes(x=year,y=annual_mean,color=basin)) + 
+  geom_point() + ### get rid of 's'
+  facet_wrap(~parameter, scales='free') + 
+  theme_few() + ### Student: remove 's'
+  scale_color_few() + 
+  theme(legend.position=c(.7,.15)) + 
+  guides(color=guide_legend(ncol=2))
+
+```
+
+### Watershed size
+
+Many prior publications have shown that increasing watershed size means decreasing variance in anion and cation concentrations. We can use our dataset to test this in the colorado basin. 
+
+```{r}
+conc.annual %>%
+  left_join(site.info,by='SiteID') %>%
+  filter(annual_var < 5000) %>%
+  ggplot(.,aes(x=year,y=annual_var,color=area)) + 
+  geom_point() + 
+  facet_wrap(~parameter,scales='free') + ### Student: get rid of 's'
+  theme_few() + 
+  theme(legend.position=c(.7,.15)) 
+```
+
+# Fin
+
+<!--chapter:end:2.2_debug_existing_code.Rmd-->
+
+---
+title: "ChatGPT Analysis of Mean Discharge in a River"
+author: "Yezzen Khazindar"
+date: "2023-01-30"
+output: html_document
+editor_options: 
+  markdown: 
+    wrap: 72
+always_allow_html: true
+---
+```{r chapter-title-4, include=FALSE}
+toc.title <- "Chapter 2.3: ChatGPT"
+```
+# ChatGPT, the analyst
+
+For this assignment you will be asking ChatGPT to conduct an analysis of
+mean river discharge for any river station in the USA. You can use the
+Poudre River in Fort Collins if you want, but I encourage you to find
+other USGS stations that you are interested in. This assignment will
+have three prompts for ChatGPT, and you will need to troubleshoot this
+code for each prompt. The prompts are:
+
+1.  *Using R, Download daily discharge data for XX river in YY city from
+    1990-2022 (you pick the river and the city).* You can choose to
+    provide ChatGPT with an actual USGS station ID which will produce
+    less errors, or you can see how well it figures out station ids (its
+    bad at this for some reason). You may also need to provide it with
+    specific package recommendations (as I do in the videos).
+
+2.  How would I take the summertime (June 21 - Sept 21) annual mean of
+    this data and plot it with year on the x-axis and summertime mean
+    flow on the y axis.
+
+3.  How would I Use a linear model to determine if summer annual mean
+    discharge is changing?
+
+4 (Bonus). Why might a linear model be a poor choice for this analysis?
+
+## Data Download
+
+```{r}
+install.packages("tidyverse")
+library(tidyverse)
+install.packages("dataRetrieval")
+library(dataRetrieval)
+
+```
+
+```{r}
+poudre_data <- readNWISdv(siteNumber = "06752260", startDate = "1990-01-01", endDate = "2022-12-31", parameterCd = "00060")
+
+```
+
+```{r}
+glimpse(poudre_data)
+
+```
+
+## Data analysis and visualization
+
+```{r}
+library(dplyr)
+library(lubridate)
+colnames(poudre_data)[colnames(poudre_data)=="X_00060_00003"] <- "Discharge"
+
+poudre_data$Date <- ymd(poudre_data$Date)
+
+# Filter the data to only include the summer months
+poudre_summer <- poudre_data %>%
+  filter(month(Date) >= 6, month(Date) <= 9)
+
+# Group the data by year and calculate the mean flow for each year
+poudre_mean <- poudre_summer %>%
+  mutate(year = year(Date)) %>%
+  group_by(year) %>%
+  summarize(mean_flow = mean(Discharge, na.rm = TRUE))
+
+# Plot the data
+library(ggplot2)
+ggplot(poudre_mean, aes(x = year, y = mean_flow)) +
+  geom_line() +
+  xlab("Year") +
+  ylab("Summertime Mean Flow (cfs)")
+
+```
+
+## Model output
+
+```{r}
+model <- lm(mean_flow ~ year, data = poudre_mean)
+summary(model)
+ggplot(poudre_mean, aes(x = year, y = mean_flow)) + 
+  geom_point() + 
+  geom_line(aes(x = year, y = predict(model)), color = "red")
+
+```
+
+## Bonus - why linear models are dangerous time-series analysis tools.
+
+Linear models are powerful statistical tools for understanding the
+relationships between variables, but they can be dangerous when used for
+time-series analysis for the following reasons:
+
+1.  Stationarity assumption: Most linear models assume that the
+    underlying data is stationary, meaning that the mean and variance
+    are constant over time. In time-series analysis, this assumption is
+    often not met, and deviations from stationarity can lead to
+    inaccurate results and biased estimates.
+
+2.  Autocorrelation: Time-series data is often autocorrelated, meaning
+    that the value at a given time is influenced by the values at
+    previous times. Linear models do not account for this type of
+    dependency, and can lead to incorrect inferences about the
+    relationships between variables in a time-series context.
+
+3.  Non-linearity: Many time-series phenomena exhibit non-linear
+    relationships, but linear models can only model linear
+    relationships. If the true relationship between variables in a
+    time-series is non-linear, a linear model will not capture this
+    relationship and can lead to incorrect inferences.
+
+4.  Outliers: Time-series data can be affected by outliers or extreme
+    values that can have a large impact on the results of a linear
+    model. However, linear models are often sensitive to outliers and
+    can produce biased estimates if outliers are present in the data.
+
+<!--chapter:end:2.3_Debugging_ChatGPT.Rmd-->
+
+---
+title: "Lesson 3.1: API Calls, Functions, and Iterations"
+author: "Yezzen Khazindar"
+date: "`r Sys.Date()`"
+output: 
+  github_document:
+    df_print: paged
+always_allow_html: true
+---
+```{r chapter-title-5, include=FALSE}
+toc.title <- "Chapter 3.1: API Function Iterator"
+```
+
+```{r setup-3, include = FALSE}
+knitr::opts_chunk$set(echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE, rows.print=5)
+```
+
+### Lesson Objectives
+
+In this lesson we will download data using an application programming interface (API), create our own functions, and iterate using `for` loops and `map()`. To fulfill these objectives we will be utilizing two park visitation data sets from the National Park Service (NPS): NPS-wide visitation data, and park unit-specific visitation data.
+
+There are **seven exercises** in this lesson that must be completed.
+
+# APIs
+
+An API is software that acts as an intermediary between an online data warehouse (or server) and its users (or clients). As data scientists, APIs provide us a way to request clean and nicely-formatted data that the server will then send to our local computers, all within our RStudio console! To work with APIs, we will need to use two new packages: `httr`, which allows us to communicate with the API's server, and `jsonlite`, which allows us to work with one of the most common API data formats, JSON. Let's go ahead and load in our packages for this lesson:
+
+```{r}
+library(tidyverse)
+library(httr)
+library(jsonlite)
+```
+
+## NPS Visitation Data
+
+This week, we will be exploring NPS visitor use data across the NPS system as a whole, and and across specific park units. Like many institutions, NPS has a server that stores all of this information (as well as many other things), and an API for users to be able to access it.
+
+To utilize the NPS API in R, we first need to explore its [API's data structure](https://irmaservices.nps.gov/). In almost every case, we use URLs to access specific data from APIs. To find the access URL for NPS visitation data, go to [Stats Rest API - Documentation](https://irmaservices.nps.gov/v3/rest/Stats/help) (though not very intuitive, the NPS API calls its visitation data set "Stats"). Listed there you will see that all data associated with the "Stats" data set can be accessed using the base URL [**https://irmaservices.nps.gov/v3/rest/stats**](https://irmaservices.nps.gov/v3/rest/stats). From there, you can tack on additional html text to access two different data sets: **total/{year}** and **visitation**.
+
+For starters, let's try accessing the **total/{year}**. This data set gives us total monthly visitation across all NPS park units, for a user-selected year:
+
+[**https://irmaservices.nps.gov/v3/rest/stats/total/{YEAR}**](https://irmaservices.nps.gov/v3/rest/stats/total/%7BYEAR%7D){.uri}
+
+If you tried accessing that URL, you'll have noticed it doesn't take you anywhere. This is because the curly brackets {} signify locations in the URL that need to be updated by the user based on their specific needs. I'm curious about visitor use in my birth year, so let's tweak the URL to access visitation data from 1992. In R, we can access this data using `httr`'s `GET()` function, replacing {YEAR} with 1992.
+
+```{r}
+raw_data <- httr::GET(url = "https://irmaservices.nps.gov/v3/rest/stats/total/1992")
+
+# view raw_data
+# View(raw_data)
+```
+
+Viewing the data set as-is, you can see it is not super human-readable. This is because data sent from APIs is typically packaged using JavaScript Object Notation (JSON).
+
+To unpack the data, we will first need to use `httr`'s `content()` function. In this example, we want the data to be extracted as *text,* since this is a data table. Moreover, its encoding is listed as *UTF-8*. The encoding parameter can be found by opening our raw data set in our R console:
+
+```{r}
+raw_data # lists 'UTF-8'
+
+# convert content to text
+unpacked_data <- httr::content(raw_data, as = "text", encoding = "UTF-8") 
+```
+
+Second, we need to transform this string of text, which is still in JSON formatting, into a data frame using `jsonlite`'s `fromJSON()`:
+
+```{r}
+# parse text from JSON to data frame
+final_data <- jsonlite::fromJSON(unpacked_data)
+
+final_data
+```
+
+Hooray, you have now successfully pulled in an online data set using an API! 😁
+
+### Exercise #1 {style="color: maroon"}
+
+**Using the code above as a starting point, pull in monthly NPS-wide visitation data for the years 1980, 1999, and 2018.**
+
+```{r}
+raw_data1980 <- httr::GET(url = "https://irmaservices.nps.gov/v3/rest/stats/total/1980")
+raw_data1999 <- httr::GET(url = "https://irmaservices.nps.gov/v3/rest/stats/total/1999")
+raw_data2018 <- httr::GET(url = "https://irmaservices.nps.gov/v3/rest/stats/total/2018")
+```
+
+### Exercise #2 {style="color: maroon"}
+
+**Now, let's explore the second NPS visitation data set, [visitation](https://irmaservices.nps.gov/v3/rest/Stats/help). This call pulls in monthly data for a specific park, across a specific time frame. Use your new API skills to pull in visitation data for Rocky Mountain National Park from 2010 through 2021, based on the API's URL template. The unit code for Rocky Mountain National Park is ROMO. (Hint: an API URL can have multiple sections that need to be updated by the user.)**
+
+```{r}
+raw_dataROMO <- httr::GET(url = "https://irmaservices.nps.gov/v3/rest/stats/visitation?unitCodes=ROMO&startMonth=01&startYear=2010&endMonth=12&endYear=2021")
+
+```
+
+```{r}
+raw_dataROMO # lists 'UTF-8'
+
+# convert content to text
+unpacked_dataROMO <- httr::content(raw_dataROMO, as = "text", encoding = "UTF-8")
+```
+
+```{r}
+# parse text from JSON to data frame
+final_dataROMO <- jsonlite::fromJSON(unpacked_dataROMO)
+
+final_dataROMO
+```
+
+# Functions
+
+You may find yourself thinking, *"Wow, exercise 1 was overkill!"* Indeed, you had to run several lines of code that were nearly identical to what was shown upstream; the only thing you needed to change from one year to the next was the year itself. This sort of redundant coding is not good coding practice. Instead of copying and pasting many coding steps over and over again and tweaking just a tiny portion of it, we can write *functions* that combine many coding steps into just one command. The benefits of reducing redundant code in this way are threefold. As Grolemund & Wickham describe in their book, [*R for Data Science*](https://r4ds.had.co.nz/):
+
+> 1.  It's easier to see the intent of your code, because your eyes are drawn to what's different, not what stays the same.
+> 2.  It's easier to respond to changes in requirements. As your needs change, you only need to make changes in one place, rather than remembering to change every place that you copied-and-pasted the code.
+> 3.  You're likely to have fewer bugs because each line of code is used in more places.
+
+*Functions* provide the option of changing just a minor part of the code base from one run to the next. Think of the `GET()` function in `httr`: it is a function that has code under-the-hood so that it isn't necessary to write out the raw code each time we use it. Instead, we call out the function's name (`GET()`), and the necessary argument within that function that tweaks the code to fit it to our needs (`url = "<SOME_URL_WE_CHOOSE>"`).
+
+## Functionize API Pulls
+
+Let's try making a function called `parkwide_visitation()` that pulls in NPS-wide visitation data for a year of choice. To develop a function requires specific formatting:
+
+... where NAME is what we want to name the function; ARGUMENTS are the variables in the code that get "tweaked"; ACTIONS are the lines of code we want the function to perform (which includes our ARGUMENTS); and the OUTPUT is the object we want as the final outcome of running the function.
+
+For `parkwide_visitation()`, we will use our upstream code as the basis for our function, but with a few minor yet extremely important tweaks:
+
+```{r}
+parkwide_visitation <- function(year){
+
+# pull in the data
+raw_data <- httr::GET(url = 
+                        # parse out year so that it can be chosen with the "year" argument, using paste0()
+                        paste0("https://irmaservices.nps.gov/v3/rest/stats/total/", year))
+
+# convert content to text
+extracted_data <- httr::content(raw_data, as = "text", encoding = "UTF-8") 
+
+# parse text from JSON to data frame
+final_data <- jsonlite::fromJSON(extracted_data)
+
+return(final_data)
+
+}
+```
+
+In the above function, our first object, `raw_data`, now changes based on how we define our year argument. We accomplish this through `paste0()`, which takes listed objects, transforms them into characters (if they aren't already), and concatenates them into a single character string. For example:
+
+```{r}
+my_sentence <- "I need at least"
+my_other_sentence <- "pints of ice cream a day"
+
+paste0(my_sentence, " ", 08, " ", my_other_sentence, "!")
+```
+
+So, if we make `year = 2021` in our `parkwide_visitation()` function, the year object becomes the number 2021, which makes the `paste0()` output "<https://irmaservices.nps.gov/v3/rest/stats/total/2021>", which subsequently pulls data for 2021. In other words, we can now pull visitation data for any year with just one line of code!
+
+```{r}
+pull_2018 <- parkwide_visitation(year = 2018)
+
+pull_1980 <- parkwide_visitation(year = 1980)
+
+pull_1992 <- parkwide_visitation(year = 1992)
+
+# ... and so on!
+```
+
+### Exercise #3 {style="color: maroon"}
+
+**Create a function called `unit_visitation()` that pulls park-specific visitation data for any park, across any time frame. For a list of all park codes, download [this spreadsheet](https://www.nps.gov/aboutus/foia/upload/NPS-Unit-List.xlsx). (Hint 1: functions can have multiple arguments. Hint 2: what's the difference between `05` and `"05"`?)**
+
+```{r}
+unit_visitation <- function(unit_Codes, startMonth, startYear, endMonth, endYear) {
+
+raw_data_UV <- httr::GET(url = paste0("https://irmaservices.nps.gov/v3/rest/stats/visitation?unitCodes=", unit_Codes, "&startMonth=", startMonth, "&startYear=", startYear, "&endMonth=", endMonth, "&endYear=", endYear))
+
+# convert content to text
+extracted_data_UV <- httr::content(raw_data_UV, as = "text", encoding = "UTF-8") 
+
+# parse text from JSON to data frame
+final_data_UV <- jsonlite::fromJSON(extracted_data_UV)
+
+return(final_data_UV)
+
+}
+
+unit_visitation("ROMO", 01, 2010, 12, 2021)
+```
+
+### Exercise #4 {style="color: maroon"}
+
+**Using `unit_visitation()`, pull in visitation data for Rocky Mountain National Park (ROMO), Everglades National Park (EVER), and Theodore Roosevelt National Park (THRO) from 1990 through 2021.**
+
+```{r}
+ROMO_VIS <- unit_visitation("ROMO", 01, 2010, 12, 2021)
+ROMO_VIS
+EVER_VIS <- unit_visitation("EVER", 01, 2010, 12, 2021)
+EVER_VIS
+THRO_VIS <- unit_visitation("THRO", 01, 2010, 12, 2021)
+THRO_VIS
+```
+
+## Function Defaults
+
+Look at the code that you just wrote; writing out all of those unchanging date arguments still feels repetitive, right? When developing functions, there is an option for setting default values for arguments so that you don't necessarily have to write all of them out every time you run it in the future. But, the option still exists within the function to make changes when necessary. For example, let's tweak our `parkwide_visitaion()` function to have the default year be 2021:
+
+```{r}
+parkwide_visitation <- function(year = "2021") {
+
+raw_data <- httr::GET(url = paste0("https://irmaservices.nps.gov/v3/rest/stats/total/", year))
+
+# convert content to text
+extracted_data <- httr::content(raw_data, as = "text", encoding = "UTF-8") 
+
+# parse text from JSON to data frame
+final_data <- jsonlite::fromJSON(extracted_data)
+
+return(final_data)
+
+}
+
+parkwide_visitation()
+```
+
+Because the default year is 2021, you don't have to write it out explicitly in the function (so long as that's the year you're interested in). But, you still have the option of changing the year to something else:
+
+```{r}
+parkwide_visitation(year = "1992")
+```
+
+### Exercise #5 {style="color: maroon"}
+
+**Default our `unit_visitation()` function's arguments related to the starting and ending months to January and December, respectively. This way, we are automatically pulling in data for entire years. Rerun the function for ROMO, EVER, and THRO for the 1980-2021 time period to make sure it works properly.**
+
+```{r}
+ROMO_VIS <- unit_visitation("ROMO", 01, 1980, 12, 2021)
+ROMO_VIS
+EVER_VIS <- unit_visitation("EVER", 01, 1980, 12, 2021)
+EVER_VIS
+THRO_VIS <- unit_visitation("THRO", 01, 1980, 12, 2021)
+THRO_VIS
+```
+
+# Iterations
+
+At this point, we now know how to develop functions so that we do not have to keep writing out redundant steps in a workflow. However, in that last exercise, you can see that we are *still* writing out redundant code; we are performing the exact same function on each of our three park units.
+
+Another tool for reducing redundancy is **iteration**, which allows you to do the same thing on multiple inputs. Iteration can happen across different objects, different rows, different data frames, the list goes on and on!
+
+## For loops
+
+A `for` loop is base R's iteration tool that executes code across a vector, an array, a list, etc. To save the outcome of each iteration, you must first create a vector to store the outputs in that is sized based on how many objects you want to iterate over. For example, I want to run our `parkwide_visitation()` function over the last five years: 2017, 2018, 2019, 2020, and 2021. To do that, I will first need to develop a vector listing each year:
+
+```{r}
+years <- c('2017', '2018', '2019', '2020', '2021')
+```
+
+... and then develop an empty list to store each year's `parkwide_visitation()` results (i.e., output) into:
+
+```{r}
+output_floop <- vector("list", length = length(years))
+```
+
+Now that we have a place to store each year's function results, we can move forward with the for loop itself:
+
+```{r}
+for(i in 1:length(years)){
+  
+  output_floop[[i]] <-
+    parkwide_visitation(year = years[i])
+  
+}
+```
+
+... where `years[i]` tells the `for` loop to perform `parkwide_visitation()` on the *i^th^* year (think of *i* as a moving across each year), and `output_floop[[i]]` directs the `for` loop to store the results of the *i^th^* year's run into `output`'s *i^th^* list (think of `output_floop[[i]]` as the location in `output_floop` that the *i^th^*'s results go).
+
+We now have a list containing five data frames: one for each year of visitation data:
+
+```{r}
+summary(output_floop)
+```
+
+Because each year's output is structured identically, we can confidently combine each year's data frame into a single data frame using `dplyr::bind_rows()`:
+
+```{r}
+multi_years <- dplyr::bind_rows(output_floop)
+```
+
+### Exercise #6 {style="color: maroon"}
+
+**Use a for loop to run `unit_visitation()` with arguments `start_year = 1980` and `end_year = 2021` across ROMO, EVER, and THRO. Then, create a single data frame containing each park units' output. (Hint: Your first step will be to create a vector listing each park unit.)**
+
+```{r}
+Codes <- c("ROMO", "EVER", "THRO")
+output_codes <- vector("list", length = length(Codes))
+length(Codes)
+
+for(i in 1:length(Codes)){
+  
+  output_codes[[i]] <-
+    unit_visitation(unit_Codes = Codes[i], 01, 1980, 12, 2021)
+  
+}
+
+multiple_codes <- dplyr::bind_rows(output_codes)
+
+multiple_codes
+```
+
+## Mapping
+
+The `tidyverse`'s `purrr` package has its own iteration function, `map()`, that is a variation of the `for` loop. `map()` takes a vector and applies a single function across it, then automatically stores all of the results into a list. In other words, `map()` creates an appropriately sized list to store our results in for us. This eliminates the need to create an empty list ahead of time.
+
+To create the same output as our previous `for` loop on `parkwide_visitation()`, but using `map()` instead, we would run the following code:
+
+```{r}
+output_map <- years %>% 
+  map(~ parkwide_visitation(year = .))
+```
+
+... where `~` indicates that we want to perform `parkwide_visitation()` across all years, and `.` indicates that we want to use our piped vector, `years`, as the input to the `year` argument. As you can see, `output_map` is identical to `output_floop`:
+
+```{r}
+identical(output_floop, output_map)
+```
+
+... which means we should also `bind_rows()` to get the mapped output into a single data frame:
+
+```{r}
+multi_years <- bind_rows(output_map)
+```
+
+### Exercise #7 {style="color: maroon"}
+
+**Use `map()` to run `unit_visitation()` with arguments `start_year = 1980` and `end_year = 2021` across ROMO, EVER, and THRO. Then, create a single data frame containing each park units' output.**
+
+```{r}
+output_map <- Codes %>% 
+  map(~ unit_visitation(unit_Codes = ., 01, 1980, 12, 2021))
+output_map
+```
+
+<!--chapter:end:3.1_api-funct-iter.Rmd-->
+
+---
+title: "3.2: Data Munging and Visualization"
+author: "Yezzen Khazindar"
+date: "`r Sys.Date()`"
+output: 
+  github_document:
+    df_print: paged
+always_allow_html: true
+---
+```{r chapter-title-6, include=FALSE}
+toc.title <- "Chapter 3.2: Data Munging"
+```
+
+```{r setup-4, include = FALSE}
+knitr::opts_chunk$set(echo=TRUE, eval=FALSE, message=FALSE, warning=FALSE, rows.print=5, fig.width=11)
+```
+
+### Lesson Objectives
+
+In the last lesson, we learned how to pull data from an API and reduce redundancies in our workflows through functions and iterations. In this lesson we will use the functions in the previous lesson to learn how to manipulate data frames with the `tidyverse`, and plot elegant time series graphs with the `ggplot()`, `scales` and `plotly` packages.
+
+There are **five exercises** in this lesson that must be completed.
+
+## Pulling in necessary packages and data sets
+
+```{r}
+library(tidyverse)
+library(httr)
+library(jsonlite)
+library(plotly)
+library(scales)
+```
+
+Using the `parkwide_visitation()` function from the last lesson and mapping, let's pull park-wide visitor data from 1980-2021, and name the final object `parkwide`. (Code hack: we can use `1980:2021` to create a vector of years so we don't have to write each year out!)
+
+```{r}
+parkwide_visitation <- function(year){
+
+raw_data <- httr::GET(url = 
+          
+                        paste0("https://irmaservices.nps.gov/v3/rest/stats/total/", year))
+
+extracted_data <- httr::content(raw_data, as = "text", encoding = "UTF-8") 
+
+final_data <- jsonlite::fromJSON(extracted_data)
+
+return(final_data)
+
+}
+
+years <- (1980:2021)
+
+parkwide <- years %>% 
+  map(~ parkwide_visitation(year = .)) %>% 
+  bind_rows()
+
+parkwide
+```
+
+### Exercise #1 {style="color: maroon"}
+
+**Using the `unit_visitation()` function from the last lesson and mapping, pull visitor data from 1980-2021 for the following park units: ROMO, ACAD, LAKE, YELL, GRCA, ZION, OLYM, and GRSM. Name the final output `units`.**
+
+```{r}
+park_units <- c("ROMO", "ACAD", "LAKE", "YELL", "GRCA", "ZION", "OLYM", "GRSM")
+output_codes <- vector("list", length = length(park_units))
+length(park_units)
+
+for(i in 1:length(park_units)){
+  
+  output_codes[[i]] <-
+    unit_visitation(unit_Codes = park_units[i], 01, 1980, 12, 2021)
+  
+}
+
+units <- dplyr::bind_rows(output_codes)
+
+units
+```
+
+## Exploring our data
+
+Look at the data frame structure of `parkwide` and `units`; they're exactly the same! So let's go ahead and bind those together:
+
+```{r}
+visitation <- bind_rows(parkwide, units)
+visitation
+```
+
+... except, the rows in `parkwide`'s UnitCode and UnitCode columns are empty. 😑 Let's fix the `UnitCode` column to list "Parkwide" using `mutate()` and an `ifelse()` statement:
+
+```{r}
+visitation <- visitation %>% mutate(UnitCode = ifelse(is.na(UnitCode), "Parkwide", UnitCode))
+visitation
+```
+
+Think of the above `ifelse()` operation as: "If the column `UnitCode` is `NA`, replace `NA` with `Parkwide`. Otherwise, preserve what is already in the `UnitCode` column."
+
+Now that we have a single data set containing all of the NPS visitation data that we've pulled, let's start exploring it! But first, let's aggregate the monthly data into annual data using `group_by()` and `summarize()`:
+
+```{r}
+yearly <- visitation %>%
+  group_by(UnitCode, Year) %>% 
+  # we only care about recreational visitors:
+  summarize(RecVisitation = sum(RecreationVisitors))
+
+yearly
+```
+
+What does visitation data look like through time? First we can try to graph all of the park units together:
+
+```{r}
+ggplot(data=yearly)+
+  geom_point(aes(x = Year, y = RecVisitation, color = UnitCode)) +
+  geom_path(aes(x = Year, y = RecVisitation, color = UnitCode)) +
+  scale_y_continuous(labels = scales::label_scientific()) +
+  theme_bw(base_size=10)
+```
+
+... yikes, not surprisingly, parkwide visitation is wayyyy higher than our individual unit's visitation data, making our graph pretty useless. It might be nice to have each park unit in a graph of its own.
+
+We can create individual graphs for each unit using `facet_wrap()`, and set the y-axes for each plot to `"free_y"`:
+
+```{r}
+ggplot(data=yearly) +
+  geom_point(aes(x = Year, y = RecVisitation, color = UnitCode)) +
+  geom_path(aes(x = Year, y = RecVisitation, color = UnitCode)) +
+  scale_y_continuous(labels = scales::label_scientific()) +
+  facet_wrap(~UnitCode, scales = "free_y") +
+  theme_bw(base_size=10)
+```
+
+We can also make this plot interactive by feeding it into `plotly`'s `ggplotly()` function:
+
+```{r}
+plotly::ggplotly(
+  ggplot(data=yearly) +
+    geom_point(aes(x = Year, y = RecVisitation, color = UnitCode)) +
+    geom_path(aes(x = Year, y = RecVisitation, color = UnitCode)) +
+    scale_y_continuous(labels = scales::label_scientific()) +
+    facet_wrap(~UnitCode, scales = "free_y") +
+    theme_bw(base_size=10)
+)
+```
+
+### Exercise #2 {style="color: maroon"}
+
+**Create an interactive graph with two separate panes: one showing park-wide visitation, the other showing all the individual park units together. Both panes should have different y-axes.**
+
+```{r}
+# Filter data for park-wide and individual units
+parkwide_yearly <- yearly %>% filter(UnitCode == "Parkwide")
+units_yearly <- yearly %>% filter(UnitCode != "Parkwide")
+units_yearly
+# Plot park-wide data
+p1 <- ggplot(parkwide_yearly, aes(x = Year, y = RecVisitation)) + 
+  geom_line() + 
+  labs(x = "Year", y = "Park-wide Visitation") + 
+  ggtitle("Park-wide Visitation Over Time")
+
+# Plot individual units data
+p2 <- ggplot(units_yearly, aes(x = Year, y = RecVisitation, color = UnitCode)) + 
+  geom_line() + 
+  labs(x = "Year", y = "Unit Visitation") + 
+  ggtitle("Individual Park Unit Visitation Over Time") + 
+  scale_color_discrete(name = "Park Unit")
+
+# Convert ggplot objects to plotly objects
+p1 <- ggplotly(p1)
+p2 <- ggplotly(p2)
+
+subplot(p1, p2, nrows = 2, shareX = TRUE)
+```
+
+It is pretty clear that some park units get orders of magnitude more visitors than others. But just how much of the total park visitation do each of these parks account for from year to year? Here we walk through two methods to tackle this question, ***pivoting*** and ***joining***, to get park unit visitation side-by-side with park-wide data.
+
+## Pivoting
+
+Currently, our yearly data is considered *narrow* because we have all of our NPS visitation data in one column, with multiple rows representing the same year. We can make this data *wide* by using the function `pivot_wider()`
+
+```{r}
+wide_data <- yearly %>%
+  select(Year, UnitCode, RecVisitation) %>%
+  pivot_wider(., names_from = UnitCode, values_from = RecVisitation)
+wide_data
+```
+
+... where `names_from` represents the column with the values you are hoping to spread into new columns, and `values_from` represents the data you want to fill these new columns with.
+
+We can make the data set *narrow* again by using the function `pivot_longer()`:
+
+```{r}
+narrow_data <- wide_data %>%
+  pivot_longer(cols = -Year,
+               names_to = "Park",
+               values_to = "RecVisitation")
+```
+
+... where `cols` are the columns we want to gather into one column (or, the column(s) you DON'T want to gather), while `names_to` and `values_to` are the names of the new columns produced from the pivot.
+
+### Exercise #3 {style="color: maroon"}
+
+**Using `wide_data` as the starting point, create an interactive time series plot showing the annual percentage of the total visitation made up by all park units.**
+
+```{r}
+park_units
+wide_data
+# Sum each row according to year
+park_yearly <- wide_data %>%
+  mutate_at(.vars=park_units, .funs= ~ ((./ Parkwide)*100))
+wide_data
+park_yearly
+
+narrow_data_percent <- park_yearly %>%
+  select(-Parkwide) %>%
+  pivot_longer(cols = -Year,
+               names_to = "Park",
+               values_to = "UnitPercentage")
+narrow_data
+# Plot the data
+p <- ggplot(narrow_data_percent, aes(x = Year, y = UnitPercentage, color = Park)) + 
+  geom_line() + 
+  labs(x = "Year", y = "Percentage of Total Visitation") + 
+  ggtitle("Annual Percentage of Total Visitation Made Up by Park Units") + 
+  scale_color_discrete(name = "Park Unit")
+
+# Convert ggplot object to plotly object
+p <- ggplotly(p)
+p
+```
+
+## Joining
+
+Another way of getting park-wide visitation side-by-side with the park unit data is through the use of joining our original `units` and `parkwide` data sets:
+
+```{r}
+class(units)
+parkwide
+joined_data <- inner_join(x = units, y = parkwide, by = c("Year","Month"))
+view(joined_data)
+```
+
+... where `x` and `y` are the two data sets you want joined, and `by` indicates the column(s) to match them by. Note: there are several ways of joining data. Explore them with `` ?`mutate-joins` `` and `` ?`filter-joins` ``.
+
+### Exercise #4 {style="color: maroon"}
+
+**Using `joined_data` as the starting point, create an interactive time series plot showing the annual percentage of the total visitation made up by all park units. This plot should look nearly identical to the previous plot.**
+
+```{r}
+joined_data_new <- joined_data %>% mutate(UnitCode.y = if_else(is.na(UnitCode.y), "Parkwide", ""))
+# calculate sum total of all units per year
+sum_total <- joined_data_new %>% 
+  select(-Month) %>%
+  group_by(UnitCode.x,UnitCode.y, Year) %>%
+ # mutate(Sum_Totals = sum(sum(RecreationVisitors.x) + sum(NonRecreationVisitors.x))) %>%
+  summarize(sum_site = sum(RecreationVisitors.x), sum_parkwide = sum(RecreationVisitors.y))
+view(sum_total)
+# calculate percentage
+sum_vis <- sum_total %>% 
+  mutate(percent_total = sum_site * 100/sum_parkwide) 
+view(sum_vis)
+# plot it
+p2 <- ggplot(sum_vis, aes(x = Year, y = percent_total, color = UnitCode.x)) + 
+  geom_line() + 
+  labs(x = "Year", y = "Percentage of Total Visitation") + 
+  ggtitle("Annual Percentage of Total Visitation Made Up by Park Units") + 
+  scale_color_discrete(name = "Park Unit")
+
+# Convert ggplot object to plotly object
+p2 <- ggplotly(p2)
+p2
+
+
+```
+
+### Exercise #5 {style="color: maroon"}
+
+**Which park on average has the most visitation? Which park has the least visitation? Base your response on the data starting in 1990, ending in 2021. Defend your answer with numbers!**
+
+```{r}
+
+#The park with code GRSM has the most visitation on average with a minimum of 3.09% of total #visitation in 1989 and a maximum average of 5.1% of the total in 2020.
+
+```
+
+<!--chapter:end:3.2_data-munging.Rmd-->
+
+---
+title: "Lesson 3.3: USGS Streamflow"
+author: "Yezzen K"
+date: "`r Sys.Date()`"
+output: 
+  github_document:
+    df_print: paged
+always_allow_html: true
+---
+```{r chapter-title-7, include=FALSE}
+toc.title <- "Chapter 3.3: Denouement"
+```
+
+```{r setup-5, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE, rows.print=5, fig.width=9)
+```
+
+## Lesson Objectives:
+
+In this lesson you will take all of the skills you have learned up to this point and use them on a completely new set of data. This lesson has **five exercises** that need to be completed.
+
+#### Necessary packages:
+
+```{r}
+library(tidyverse)
+library(plotly)
+library(scales)
+library(httr)
+library(jsonlite)
+library(dataRetrieval)
+library(sf) # for the map
+library(mapview) # for making the interactive plot
+```
+
+## Streamflow Datasets
+
+We are interested in looking at how the Cache la Poudre River's flow changes as it travels out of the mountainous Poudre Canyon and through Fort Collins.
+
+There are four stream flow monitoring sites on the Poudre that we are interested in: two managed by the US Geological Survey (USGS), and two managed by the Colorado Division of Water Resources (CDWR):
+
+```{r, echo = F}
+# Making a tibble to convert into coordinates for our sites
+poudre_sites <- tibble(site = c("Canyon Mouth", "Lincoln Bridge", "Environmental Learning Center", "Below Fossil Creek Reservoir"),
+                       site_no = c("CLAFTCCO", "06752260", "06752280", "CLARIVCO"),
+                       lat = c(40.6645, 40.5880833, 40.5519269, 40.5013),
+                       long = c(-105.2242, -105.0692222, -105.011365, -104.967),
+                       source = c("CDWR", "USGS", "USGS", "CDWR")) %>%
+  sf::st_as_sf(coords = c("long", "lat"), crs = 4269)
+
+# Mapview is another package that creates interactive plots, not necessary for you to know yet!
+mapview::mapview(poudre_sites, zcol = "site_no", layer.name = "Poudre River Monitoring")
+```
+
+### USGS `dataRetrieval` R package
+
+To pull data for USGS stream gages, we can use the `dataRetrieval` package, which is a USGS-managed set of functions that, much like our functions from Lesson 3.1, pull data from the USGS's data warehouse using an API. Here we will pull flow data for our USGS stream gages of interest for the last two water years:
+
+```{r}
+# pulls USGS daily ('dv') stream flow data:
+usgs <- dataRetrieval::readNWISdv(siteNumbers = c("06752260", "06752280"), # USGS site code for the Poudre River at the Lincoln Bridge and the ELC
+                               parameterCd = "00060", # USGS code for stream flow
+                               startDate = "2020-10-01", # YYYY-MM-DD formatting
+                               endDate = "2022-09-30") %>% # YYYY-MM-DD formatting
+  rename(q_cfs = X_00060_00003) %>% # USGS code for stream flow units in cubic feet per second (CFS)
+  mutate(Date = lubridate::ymd(Date), # convert the Date column to "Date" formatting using the `lubridate` package
+         Site = case_when(site_no == "06752260" ~ "Lincoln", 
+                          site_no == "06752280" ~ "Boxelder"))
+```
+
+### CDWR's API
+
+Alas, CDWR does NOT have an R package that pulls data from [their API](https://dwr.state.co.us/Rest/GET/Help#Datasets&#SurfaceWaterController&#gettingstarted&#jsonxml), but they do have user-friendly directions on how to develop API calls.
+
+Using the "URL generator" steps outlined for their [daily surface water time series data set](https://dwr.state.co.us/Rest/GET/Help/SurfaceWaterTSDayGenerator), we can get the last two water years of CFS data for the Poudre at the Canyon mouth (site abbreviation = CLAFTCCO) using the following URL:
+
+<https://dwr.state.co.us/Rest/GET/api/v2/surfacewater/surfacewatertsday/?format=json&dateFormat=dateOnly&fields=abbrev%2CmeasDate%2Cvalue%2CmeasUnit&encoding=deflate&abbrev=CLAFTCCO&min-measDate=10%2F01%2F2020&max-measDate=09%2F30%2F2022>
+
+# Exercise #1 {style="color: maroon"}
+
+Using the URL above as the starting point, develop a function that creates a data frame of CDWR daily flow (CFS) data for a selected range of water years, for any site. (HINT: The final product of our API pull is a list with additional metadata about our API pull... how do we index a list to extract the time series flow data?)
+
+```{r}
+co_water_data <- function(site, start_wyear, end_wyear){
+  
+  raw_data <- GET(url = paste0("https://dwr.state.co.us/Rest/GET/api/v2/surfacewater/","surfacewatertsday/?format=json&dateFormat=dateOnly&fields","=abbrev%2CmeasDate%2Cvalue%2CmeasUnit&encoding=deflate&abbrev=",site,"&min-measDate=10%2F01%2F",start_wyear,"&max-measDate=09%2F30%2F",end_wyear))
+
+text <- httr::content(raw_data, as = "text", encoding = "UTF-8")
+final_data_water <- jsonlite::fromJSON(text)[[5]]
+
+return(final_data_water)
+}
+test_set <- co_water_data("CLAFTCCO", "2020" , "2022")
+test_set
+
+```
+
+# Exercise #2 {style="color: maroon"}
+
+Map over the function you developed in Exercise #1 to pull flow data for CLAFTCCO and CLARIVCO for the 2021 and 2022 water years.
+
+```{r}
+ex2_sites <- c("CLAFTCCO", "CLARIVCO")
+output_map2 <- ex2_sites %>% 
+  map(~ co_water_data(site = ., "2020", "2022")) %>% 
+  bind_rows()
+output_map2
+str(output_map2)
+  
+str(usgs)
+```
+
+# Exercise #3 {style="color: maroon"}
+
+Join our USGS and CDWR data frames together (`bind_rows()`, perhaps?), then create an interactive ggplot of discharge (in CFS) through time displaying all four of our monitoring sites. Be sure all axes and labels are clear.
+
+```{r}
+usgs_datafr1 <- usgs
+
+usgs_datafr <- usgs_datafr1 %>%
+  dplyr::select(Site, Date, q_cfs) %>%
+  rename(site_code = Site)
+usgs_datafr
+
+CDWR_datafr1 <- output_map2
+
+CDWR_datafr <- CDWR_datafr1 %>%
+  dplyr::select(abbrev,measDate,value) %>%
+  mutate(Date=as.Date(measDate), site_code=abbrev, q_cfs=value) %>%
+  select(site_code,Date,q_cfs)
+CDWR_datafr
+
+#CDWR_datafr <- CDWR_datafr %>% select(site_code, Date, q_cfs)
+joined_data <- dplyr::bind_rows(usgs_datafr, CDWR_datafr)
+joined_data
+
+interactive_map <- ggplotly(
+  ggplot(mapdata=joined_data) +
+    xlab("Time") +
+    ylab("Discharge")+
+    geom_line(aes(x= Date, y= q_cfs, color= Sites))+
+    theme_bw(base_size=10)
+)
+interactive_map
+```
+
+# Exercise #4 {style="color: maroon"}
+
+Create an interactive plot of the daily difference in discharge between the Cache la Poudre River at the canyon mouth and each of the sites downstream. Make sure your plot axes are clear.
+
+```{r}
+
+```
+
+# Exercise #5 {style="color: maroon"}
+
+For each of our downstream locations, calculate how many days the canyon mouth had LOWER flow. Is this what you expected? Why or why not?
+
+```{r}
+
+```
+
+<!--chapter:end:3.3_denouement.Rmd-->
+
+---
+title: "Retrieve and Wrangle Spatial Data"
+author: "Yezzen K"
+date: "`r Sys.Date()`"
+output: github_document
+always_allow_html: true
+---
+
+```{r chapter-title-8, include=FALSE}
+toc.title <- "Chapter 4.1: Retrieve and Wrangle Spatial Data"
+```
+
+```{r setup-6, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
+```
+
+In Week 1 you were introduced to working with geospatial data in R. This week you will dive deeper into wrangling, analyzing, and visualizing geospatial data. In this lesson you will be exposed to various R packages you can retrieve spatial data from and work through importing, wrangling, and saving various spatial data sets.
+
+Start off by updating your setup.R script (you can just copy it over from your previous lesson folders) and add these new packages to your list:
+
+-   `rgbif`
+
+-   `soilDB`
+
+```{r}
+source("setup.R")
+```
+
+Set up the `tmap` mode to interactive for some quick exploitative mapping of all these various spatial data sets.
+
+```{r}
+tmap_mode("view")
+```
+
+## Vector Data
+
+### US Census spatial data with `tigris`
+
+Import the counties shapefile for Colorado again as you did in Week 1, along with linear water features for Larimer county.
+
+```{r}
+
+counties <- tigris::counties(state = "CO")
+
+linear_features <- linear_water(state = "CO", county = "Larimer")
+
+```
+
+This linear features file is pretty meaty. Inspect all the unique names for the features, what naming pattern do you notice? Let's filter this data set to only major rivers in the county, which all have 'Riv' at the end of their name. For working with character strings, the `stringr` package is extremely helpful and a member of the Tidyverse.
+
+To filter rows that have a specific character string, you can use `str_detect()` within `filter()`.
+
+```{r}
+rivers <- linear_features %>% 
+  filter(str_detect(FULLNAME, "Riv"))
+```
+
+### Species Occurrence data with [`rgbif`](https://docs.ropensci.org/rgbif/)
+
+To experiment with point data (latitude/longitude), we are going to explore the `rgbif` package, which allows you to download species occurrences from the [Global Biodiversity Information Facility (GBIF)](https://www.gbif.org/), a database of global species occurrences with over 2.2 billion records.
+
+We are going to import occurrence data for a couple of charismatic Colorado species:
+
+|                                               |                                                        |                                                                    |
+|:------------------:|:----------------------:|:---------------------------:|
+| ![Elk](images/elk.jpg){alt="Elk" width="173"} | ![Marmot](images/marmot.jpg){alt="Marmot" width="173"} | ![Salamander](images/salamander.jpg){alt="Salamander" width="215"} |
+|                      Elk                      |                 Yellow-Bellied Marmot                  |                      Western Tiger Salamander                      |
+
+To pull occurrence data with this package you use the `occ_data()` function and give it a species name you want to retrieve data for. Since we want to perform this operation for three species, this is a good opportunity to work through the iterative coding lessons you learned last week.
+
+We first need to create a string of species scientific names to use in the download function, and create a second string with their associated common names (order matters, make sure the two strings match).
+
+```{r}
+#make a string of species names to use in the 'occ_data' function
+species <- c("Cervus canadensis", "Marmota flaviventris", "Ambystoma mavortium")
+
+#also make a string of common names
+common_name <- c("Elk", "Yellow-bellied Marmot", "Western Tiger Salamander")
+```
+
+### Exercise #1 {style="color: red"}
+
+The code below shows you the steps we want to import data for a single species. Convert this chunk of code to a for loop that iterates across each species scientific and common name.
+
+*Tip for getting started*: You will need to add a couple extra steps outside of the for loop, including first creating an empty list to hold each output of each iteration and after the for loop bind all elements of the list to a single data frame using `bind_rows()` .
+
+```{r}
+occ <- vector("list", length = length(species))
+
+for(i in 1:length(occ)){
+  occ[[i]] <-
+    occ_data(
+      scientificName = species[i],
+      hasCoordinate = TRUE, #we only want data with spatial coordinates
+      geometry = st_bbox(counties), #filter to the state of CO
+      limit = 2000 #optional set an upper limit for total occurrences to download
+    ) %>%
+    .$data #return just the data frame. The '.' symbolizes the previous function's output. 
+  
+  # add species name column as ID to use later
+  occ[[i]]$ID <- common_name[i]
+  
+  #clean by removing duplicate occurrences
+  occ[[i]] <- # a list should always have double bracket
+    occ[[i]] %>% distinct(decimalLatitude, decimalLongitude, .keep_all = TRUE) %>%
+    dplyr::select(Species = ID,
+                  decimalLatitude,
+                  decimalLongitude,
+                  year,
+                  month,
+                  basisOfRecord) 
+}
+
+df1_occ <- bind_rows(occ)
+df_occ <- data.frame(df1_occ)
+sf_occ <- st_as_sf(df_occ, coords = c("decimalLongitude", "decimalLatitude"), crs = 4326)
+class(sf_occ)
+
+```
+
+Once you have your full data frame of occurrences for all three species, convert it to a spatial `sf` points object with the CRS set to 4326. Name the final object `occ`.
+
+**Note**: we only used a few filter functions here available with the `occ_data()` function, but there are many more worth exploring!
+
+```{r}
+?occ_data
+```
+
+#### Challenge! {style="color:red"}
+
+Re-write the for loop to retrieve each species occurrences but using `purrr::map()` instead.
+
+### SNOTEL data with [`soilDB`](http://ncss-tech.github.io/soilDB/)
+
+The `soilDB` package allows access to many databases, one of which includes daily climate data from USDA-NRCS SCAN (Soil Climate Analysis Network) stations. We are particularly interested in the SNOTEL (Snow Telemetry) sites to get daily snow depth across Colorado.
+
+First, you will need to read in the site metadata to get location information. The metadata file is included with the `soilDB` package installation, and you can bring it into your environment with `data()`
+
+```{r}
+data('SCAN_SNOTEL_metadata', package = 'soilDB')
+```
+
+### Exercise #2 {style="color: red"}
+
+Filter this metadata to only the 'SNOTEL' sites and 'Larimer' county, convert it to a spatial `sf` object (set the CRS to `4326`, WGS 84), and name it 'snotel_sites'.
+
+How many SNOTEL sites are located in Colorado?
+
+```{r}
+head(SCAN_SNOTEL_metadata)
+
+# filter the data
+sno_lar <- SCAN_SNOTEL_metadata %>%
+  filter(., County == 'Larimer', Network == 'SNOTEL')
+
+# change dataframe to spatial object
+
+# convert to spatial
+snotel_sites <- st_as_sf(sno_lar, coords = c("Longitude", "Latitude"), crs = 4326)
+
+qtm(snotel_sites)
+
+
+?st_as_sf
+# st_drop_geometry() can be used to switch back to spatial
+```
+
+### Exercise #3 {style="color: red"}
+
+Below is the string of operations you would use to import data for a single SNOTEL site for the years 2020 to 2022. Use `purrr::map()` to pull data for all unique SNOTEL sites in the `snotel_sites` object you just created. Coerce the data to a single data frame, then as a final step use `left_join()` to join the snow depth data to the station data to get the coordinates for all the sites, and make it a spatial object.
+
+```{r}
+#First Site ID
+Site <- unique(snotel_sites$Site)[1]
+
+
+data <- fetchSCAN(site.code = Site, 
+                  year = 2020:2022) %>%
+  # this returns a list for each variable, bind them to a single df
+  bind_rows() %>%
+  as_tibble() %>%
+  #filter just the snow depth site
+  filter(sensor.id == "SNWD.I") %>% 
+  #remove metadata columns
+  dplyr::select(-(Name:pedlabsampnum))
+
+Site2 <- unique(snotel_sites$Site)
+Site2
+snotel_function <- function(Site2){
+  fetchSCAN(site.code = Site2, 
+                  year = 2020:2022) %>%
+  # this returns a list for each variable, bind them to a single df
+  bind_rows() %>%
+  as_tibble() %>%
+  #filter just the snow depth site
+  filter(sensor.id == "SNWD.I") %>% 
+  #remove metadata columns
+  dplyr::select(-(Name:pedlabsampnum))
+}
+
+# Use purrr::map() to pull data for all unique SNOTEL sites in the snotel_sites object you just created.
+snotel_map <- purrr::map(Site2, snotel_function) %>%
+  bind_rows()
+# Coerce the data to a single data frame
+
+# Final step: use left_join() to join the snow depth data to the station data to get the coordinates for all the sites, and make it a spatial object.
+
+snotel_map1 <- snotel_map %>%
+  left_join(snotel_sites, by = "Site")
+
+st_as_sf(snotel_map1)
+
+?map
+```
+
+### Save Vector Data
+
+Save all the vector objects you created above (counties, rivers, occurrences, and snotel) to a single .RData file in the data/ folder. For the purposes of reproducibility and peer review, you should name this file 'spatdat.RData'.
+
+```{r}
+save(counties, rivers, occ, snotel_map1, file = "data/spatdat.RData")
+```
+
+## Raster Data
+
+### Elevation data with `elevatr`
+
+### Exercise #4 {style="color: red"}
+
+Follow instructions from the Week 1 spatial lesson to import elevation data for Colorado at a zoom level of 7 and write it to a .tif file in the data/ folder of this repo. **Name the file 'elevation.tif'**. Make sure to crop the raster layer to the extent of Colorado, and give it the name "Elevation". **Produce a quick plot to show your final raster object**.
+
+The auxillary file is the key for the raster data so it provides info on what each of the points and values are for the NLCD_CO file
+
+```{r}
+counties1 <- counties(state = "CO")
+
+elevation1 <- get_elev_raster(counties1, z=7)
+qtm(elevation1)
+
+elevation_raster <- rast(elevation1)
+
+crs(elevation_raster)
+# Set the CRS to EPSG:4326 (WGS 84)
+crs(elevation_raster) <- "+init=EPSG:4326"
+
+# Define a valid object to extract the raster
+Larimer <- counties1[counties1$NAME == "Larimer", ]
+
+# Double-check that Larimer is a valid object
+class(Larimer)
+summary(Larimer)
+
+crop_elevation <- crop(elevation_raster, ext(Larimer))
+
+writeRaster(crop_elevation, file = 'data/elevation.tif', overwrite=TRUE)
+
+
+```
+
+### Landcover data
+
+Read in the NLCD_CO.tif file in the data/ folder of the repo. Make note of the auxillary file .aux.xml with the .tif file. This raster represents National Land Cover Database (NLCD) 2019 CONUS landcover data downloaded from the [MRLC website](https://www.mrlc.gov/data/nlcd-2019-land-cover-conus) and aggregated to \~1km resolution.
+
+### Exercise #5 {style="color:red"}
+
+What is the purpose of this auxiliary file? How is this landcover raster data different from our elevation data?
+
+ANSWER: The auxillary file is the key for the raster data so it provides info on what each of the points and values are for the NLCD_CO file
+
+<!--chapter:end:4.1_get-spatial.Rmd-->
+
+---
+title: "Spatial Data Analysis"
+author: "Yezzen K"
+date: "`r Sys.Date()`"
+output: github_document
+always_allow_html: true
+---
+
+```{r chapter-title-9, include=FALSE}
+toc.title <- "Chapter 4.2: Spatial Data Analysis"
+```
+
+```{r setup-7, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
+```
+
+In the first lesson this week you were exposed to various databases you can pull spatial data from and worked through importing, wrangling, and saving those spatial data types. Today we are going to use those data sets to perform a range of spatial analyses.
+
+You have briefly used the `sf` and `terra` packages so far in this course, but today we will be exploring them much more in depth using the wide range of spatial analysis operations they provide.
+
+You shouldn't need to install any new packages for today:
+
+```{r}
+source("setup.R")
+```
+
+## Load in spatial data
+
+To carry out today's lesson you will need to read in the data you saved to your 'data/' folder from the 'get-spatial' lesson:
+
+```{r key1}
+#load in all your vector data
+load("data/spatDat.RData")
+
+#read in the elevation and landcover rasters
+landcover <- terra::rast("data/NLCD_CO.tif")
+
+elevation <- terra::rast("data/elevation.tif")
+```
+
+## Distance Calculations
+
+We're going to start off today with some distance calculations. Using our species occurrence data, say we want to compare each species average distance to the nearest river.
+
+Throughout today we are going to be mapping our spatial data to quickly inspect it and get a visual of the data's extent and characteristics, so lets set our `tmap` mode to interactive.
+
+```{r}
+tmap_mode("view")
+```
+
+Quick view of all our points, colored by species:
+
+```{r}
+
+qtm(sf_occ, symbols.col = "Species")
+```
+
+Now, calculating the distance to the nearest river involves point to line distance calculations, which we can perform with the `sf` package.
+
+Before performing any spatial operations, remember all of our spatial objects must be in the same CRS.
+
+Using what you learned in week one, check the CRS of the occurrences and rivers, and perform a spatial transformation if needed (***for the sake of this lesson, keep data in NAD83***).
+
+```{r}
+st_crs(rivers)
+st_crs(sf_occ)
+
+occ <- st_transform(sf_occ, st_crs(rivers))
+
+st_crs(rivers) == st_crs(occ)
+view(occ)
+
+occ_larimer <- st_filter(occ, filter(counties, NAMELSAD == "Larimer County"), .predicate = st_intersects)
+
+occ_larimer$nearest_river <- st_nearest_feature(occ_larimer, rivers)
+
+occ_larimer$river_dist_m <-
+  st_distance(occ_larimer, rivers[occ_larimer$nearest_river, ], by_element = TRUE)
+
+str(occ_larimer)
+```
+
+```{r}
+st_crs(rivers)
+st_crs(sf_occ)
+#complete this operation
+occ <- st_transform(sf_occ, st_crs(rivers))
+
+st_crs(rivers) == st_crs(occ)
+view(occ)
+```
+
+### Exercise #1
+
+Our occurrence data set covers all of Colorado, but rivers are only for Larimer County. So, we have to first filter our points to Larimer County. Explore the use of `st_filter()` and use it to filter points that are found within the Larimer County polygon (which you can filter/index from your `counties` object). Call the new object`'occ_larimer` and include a quick plot of the filtered points.
+
+<hr>
+
+```{r}
+
+occ_larimer <- st_filter(occ, filter(counties, NAMELSAD == "Larimer County"), .predicate = st_intersects)
+```
+
+Great, now we just have species occurrences within Larimer County.
+
+Now for each point we want to calculate its distance to the nearest river. The most efficient way is to first find the nearest line feature for each point. We can do this with the `st_nearest_feature()` function.
+
+This function returns the index values (row number) of the river feature in the `rivers` spatial data frame that is closest in distance to each point. Here we are saving these index values in a new column of our Larimer occurrences that we will use later to calculate distances.
+
+```{r}
+occ_larimer$nearest_river <- st_nearest_feature(occ_larimer, rivers)
+```
+
+Now, for each point we can use the `st_distance()` function to calculate the distance to the nearest river feature, using the index value in our new "nearest_river" column. Adding `by_element = TRUE` is necessary to tell the function to perform the distance calculations by element (row), which we will fill into a new column "river_dist_m".
+
+```{r}
+occ_larimer$river_dist_m <-
+  st_distance(occ_larimer, rivers[occ_larimer$nearest_river, ], by_element = TRUE)
+```
+
+Notice that the new column is more than just a numeric class, but a "units" class, specifying that the values are in meters.
+
+```{r}
+str(occ_larimer)
+```
+
+### Exercise #2
+
+Cool, now you have the distance to the nearest river (in meters) for each individual species occurrence, but you want the average distance for each species. Using what you know of the `dplyr` functions, calculate the species average distance, then re-create the bar plot below with `ggplot2` to compare the averages (feel free to add more customization!):
+
+![](images/ex2_barplot.png)
+
+*Hint*: remember that the new distance column is a 'units' data type and may throw an error. You will need to coerce that data type in order to complete the operation.
+
+```{r}
+library(units)
+
+# group by species and calculate the mean distance
+avg_distance <- occ_larimer %>%
+  group_by(Species) %>%
+  summarise(mean_dist = mean(river_dist_m))
+
+# create bar plot
+ggplot(avg_distance, aes(x = Species, y = mean_dist)) +
+  geom_bar(stat = "identity") +
+  xlab("Species") +
+  ylab("Average distance to nearest river")
+```
+
+## Buffers
+
+Alternatively, say you want to know what percentage of species' occurrences (points) were found within a specified distance of a river (calculated buffer).
+
+To do this we could add a buffer around our line features and filter the points that fall within that buffer zone. For this example let's say we are interested in the 100 m buffer zone around a river. However, if you try this you'll notice this operation takes quite a while.
+
+
+
+Instead, a more efficient way would be to make a 100 m buffer around each point, and see how many of those buffers intersect with a river.
+
+```{r}
+occ_buffer <- st_buffer(occ_larimer, dist = 100)
+
+```
+
+Still takes a little bit of run time, but much faster than buffering each line feature. Our `occ_buffer` object is now a spatial polygon data frame, where each feature is an occurrence buffer with 100 m radius.
+
+## Spatial Intersect
+
+We can conduct spatial intersect operations using the function `st_intersects()`. This function checks if each individual buffer intersects with a river, and if so it returns an index value (row number) for each river feature it intersects. This function returns a list object for each buffer polygon, that will be empty if there are no intersections. We will add this as a column to our buffer data set, and then create a binary yes/no river intersection column based on those results (is the list empty or not?).
+
+```{r}
+river_intersections <- st_intersects(occ_buffer, rivers)
+
+# Let's test length of river_intersections[[1]] and putting double brackets since it's a list
+
+# We should put lengths down bc it returns the length of each individual element 
+
+# 
+```
+
+If we inspect this object, we see it is a list of the same length as our `occ_buffer` object, where each list element is either empty (no intersections) or a list of index numbers for the river features that do intersect that buffer.
+
+### Exercise #3
+
+Create a new column in `occ_buff` that returns TRUE/FALSE if the buffer intersects with a river.
+
+*Hint*: make use of the `lengths()` function..we aren't interested at this point in how many river features are within 100m of a species occurrence, just whether or not there was a river within the buffer or not.
+
+Second, calculate what percentage of occurrences are within 100 m of a river for each species using `dplyr` operations. The below code will get you started, however it doesn't quite work. Why not? There is one line of code you need to add to the pipe operations for this to work, what is it?
+
+```{r}
+length(river_intersections[[1]])
+
+occ_buffer$buffer_intersect <- lengths(river_intersections) > 0
+
+occ_buffer %>% 
+  group_by(Species) %>% 
+  summarise(total_occ = n(), percent_river = (sum(buffer_intersect == TRUE)/total_occ)*100) %>% # this code doesn't work
+  st_drop_geometry() # just added this according to instruction
+
+occ_buffer <- mutate(occ_buffer, occ_buff = 0)
+for (i in 1:length(river_intersections)) {
+  occ_buffer$occ_buff[i] <- if_else(length(river_intersections[[i]]) > 0 , 1, 0)
+}
+# river_100m will be whatever name you give the new column (maybe buffer_intersect). For each species give new name for each species.
+
+# occ_buffer$buffer_intersect <- lengths(river_intersections) > 0
+# 2nd part: 
+```
+
+<hr>
+
+#### Reflection
+
+This analysis is just for teaching purposes, why would you be cautious about these results for answering real research questions? Think about how we filtered everything to a political boundary, what's wrong with this method?
+
+## Raster Reclassification
+
+So far we've dealt with a bunch of vector data and associated analyses with the `sf` package. Now lets work through some raster data analysis using the `terra` package.
+
+First, lets explore the landcover raster by making a quick plot.
+
+```{r}
+qtm(landcover)
+```
+
+This land cover data set includes attributes (land cover classes) associated with raster values. We can quickly view the frequency of each land cover type with the `freq()` function.
+
+```{r}
+freq(landcover)
+```
+
+Use `ggplot2` to turn this into a bar chart
+
+<details>
+
+<summary>Show Answer</summary>
+
+```{r}
+freq(landcover) %>% 
+  ggplot(aes(reorder(value, count), count)) +
+  labs(x = "") +
+  geom_col() +
+  coord_flip() # switch the axes to better view land cover class names
+```
+
+</details>
+
+<br>
+
+Say we want to explore some habitat characteristics of our species of interest, and we are specifically interested in forest cover. Our first step is to create a new raster layer from our land cover layer representing percent forest cover. This will involve multiple operations, including raster reclassification and focal statistics. Specifically, say we want to calculate the average percentage of forest cover and urbanization within a 9x9 pixel moving window (remember since rasters are made up of pixels, the distances we use are dependent on the resolution of the raster).
+
+First, reclassify the land cover raster creating a new raster representing just forest/non-forest pixels.
+
+Since rasters are technically matrices, we can index and change values using matrix operations. Given this particular raster uses character names associated with values (thanks to the .aux file!), we can index by those names.
+
+```{r}
+#first assign landcover to a new object name so we can manipulate it while keeping the origian
+forest <- landcover
+
+#where the raster equals any of the forest categories, set that value to 1
+forest[forest %in% c("Deciduous Forest", "Evergreen Forest", "Mixed Forest")] <- 1
+
+#SPELLING IS IMPORTANT
+
+#now set all non forest pixels to NA
+forest[forest != 1] <- NA
+```
+
+Now plot the new forest layer to get a quick sense if it looks accurate or not.
+
+```{r}
+plot(forest)
+```
+
+## Focal Statistics
+
+Now we are going to perform focal statistics with the `focal()` function, which is a spatial operation that calculates new values for each cell based on a specified moving window. For this example we are going to calculate within a 9x9km moving window (since our pixel resolution is 1km). We supply this to the `w =` argument as a matrix, where the first value is the weight of each pixel, and the second two are the number of rows and columns. Second we use the "sum" function, since each forest pixel has a value of 1 we will get the total number of forest pixels within the moving window, and then later divide the values by the total number of pixels in the window (81) to get the percentage. The final raster values will represent for each pixel the surrounding forest percentage (within \~4.5 km radius).
+
+```{r}
+forest_pct <- terra::focal(forest, w=matrix(1,9,9), fun = "sum", na.rm = TRUE)
+
+
+forest_pct <- forest_pct/81
+
+
+plot(forest_pct)
+```
+
+Next, we wanted to know the percent forest cover associated with each species occurrence. Since we are now working with multiple spatial objects, we have to first check they are all in the same CRS and if not transform the data before any spatial operations.
+
+```{r}
+crs(forest_pct)
+st_crs(forest_pct)
+st_crs(occ)
+st_crs(forest_pct)
+```
+
+### Exercise #4
+
+Looks like the raster layer is in a different CRS. Re-project this so we can use it with our vector data (which are all in NAD83) using the `project()` function from `terra`, and write a line of code that checks whether or not the new object and the `occ` object have the same CRS.
+
+```{r}
+library(terra)
+library(raster)
+
+# Convert forest_pct to a SpatRaster
+#forest_pct_raster <- raster(forest_pct)
+
+# Set the CRS of the raster
+#crs(forest_pct_raster) <- "+proj=longlat +datum=NAD83"
+
+# Project the forest_pct raster to the same CRS as the occ object
+forest_pct <- terra::project(forest_pct, crs(occ))
+
+crs(forest_pct) == crs(occ)
+```
+
+## Raster Extract
+
+Now we can use the `extract()` function to extract the raster pixel value at each occurrence.
+
+```{r}
+terra::extract(forest_pct, occ)
+```
+
+### Exercise #5
+
+Notice that this returns a 2 column data frame, with an ID for each feature (occurrence) and the extracted raster value in the second column. How would you write this line of `extract()` code to add a single column to the occurrence data set of just the forest percentage value?
+
+*Hint:* Use your knowledge of indexing!
+
+Then calculate the average forest cover for each species. On average, which species is associated with the highest percentage of forest cover?
+
+Create a boxplot to compare the spread of values across species.
+
+```{r}
+occ$forest_pct <- terra::extract(forest_pct, occ)[,2]
+
+```
+
+```{r}
+library(dplyr)
+
+species_forest_avg <- occ %>%
+  group_by(Species) %>%
+  summarize(avg_forest_pct = mean(forest_pct, na.rm = TRUE))
+
+library(ggplot2)
+
+ggplot(species_forest_avg, aes(x = Species, y = avg_forest_pct)) +
+  geom_boxplot() +
+  ylab("Forest percentage") +
+  xlab("Species") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+
+```
+
+That's one way to use the `extract()` function. We can also extract raster values within polygons, and supply a function to summarize those raster values.
+
+### Exercise #6
+
+Calculate the most common landcover type in each Colorado county, working through the following steps **filling in the necessary code**:
+
+Project the landcover raster to the CRS of the counties shapefile
+
+```{r}
+landcover_prj <- terra::project(landcover, crs(counties))
+```
+
+Add a new column to `counties` that is the most common land cover type, using the function `modal` within `extract()`.
+
+```{r}
+counties$common_landcover <- terra::extract(landcover_prj, counties, fun = modal)
+
+```
+
+Notice however that this returns the raw raster values, which are not informative to us without knowing the associated landcover classes.
+
+Since we have the associated auxillary file with this raster, we can extract metadata to get the value/class pairs with the `cats()` function.
+
+```{r}
+cats(landcover)
+class(landcover)
+
+```
+
+Look at what class this function returns though. Coerce this into a data frame (there are multiple ways you could do this). Once you have have it as a data frame, use some `dplyr` operations to select just the value and land cover class columns, and remove all the empty rows (i.e., those without a landcover class). This should return a data frame of 17 rows. Call it `nlcd_classes`.
+
+```{r}
+
+# Assuming the 'landcover' object is already created
+nlcd_classes <- as.data.frame(landcover)
+
+head(nlcd_classes)
+
+# Select the value and land cover class columns
+nlcd_classes <- nlcd_classes %>%
+  dplyr::select(value, landcover_class)
+
+# Remove empty rows (those without a landcover class)
+nlcd_classes <- nlcd_classes %>%
+  filter(!is.na(landcover_class))
+
+# Display the resulting data frame
+view(nlcd_classes)
+
+```
+
+Then tie `nlcd_classes` to the `counties` data frame with `left_join()`, which will join two data frames by a common variable. In this case, your common variable is the raw raster value. Look at the documentation for `left_join()` and how you use the `by =` argument to complete this step.
+
+```{r}
+counties <- left_join(counties, nlcd_classes, by = c("common_landcover" = "value"))
+colnames(counties)[colnames(counties) == "Land_Cover_Class"] <- "common_landcover_class"
+
+# Alternatively, you can use merge():
+# counties <- merge(counties, nlcd_classes, by.x = "common_landcover", by.y = "value", all.x = TRUE)
+# colnames(counties)[colnames(counties) == "Land_Cover_Class"] <- "common_landcover_class"
+
+# View the updated counties data frame
+head(counties)
+```
+
+Finally, create a map of Colorado counties that is colored by the most common landcover type (using the class, not the raw value) in each county. The map can be interactive or static, but must include a legend.
+
+```{r}
+
+```
+
+<!--chapter:end:4.2_spatial-analysis.Rmd-->
+
+---
+title: "Spatial Data Visualization"
+author: "Caitlin Mothes"
+date: "`r Sys.Date()`"
+output: github_document
+always_allow_html: true
+---
+
+```{r chapter-title-10, include=FALSE}
+toc.title <- "Chapter 4.3: Spatial Data Visualization"
+```
+
+```{r setup-8, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
+```
+
+## Spatial Data Visualization
+
+In this lesson we will be working with some more advanced mapping and visualization techniques, plotting multiple spatial layers together, and learn how to make these interactive.
+
+First, remember to run your setup script, and also read in all the data you created in the 'get-spatial' lesson.
+
+```{r}
+source("setup.R")
+
+#load in all your vector data
+load("data/spatdat.RData")
+
+#read in the elevation and landcover rasters
+landcover <- terra::rast("data/NLCD_CO.tif")
+
+elevation <- terra::rast("data/elevation.tif")
+```
+
+## Mapping with `ggplot2`
+
+Let's start visually exploring our counties data. R has a base `plot()` function which you may have used briefly in previous lessons. If you want to use it to plot `sf` objects, you have to specify the `geometry` column.
+
+```{r}
+plot(counties$geometry)
+```
+
+You've been using `gpglot2` in Lesson 2 to make nonspatial charts, but this package also has the capability of mapping spatial data, specifically `sf` objects, with the `geom_sf()` function:
+
+```{r}
+ggplot(data = counties) +
+  geom_sf()
+```
+
+Say you want to color counties by their total area of water ('AWATER') variable:
+
+```{r}
+ggplot(data = counties, aes(fill = AWATER)) +
+  geom_sf()
+```
+
+`geom_sf()` interprets the geometry of the sf object and visualizes it with the 'fill' value given.
+
+#### Customizing `ggplot2` maps
+
+Here are some ways to make a more publication ready map:
+
+```{r}
+ggplot(data = counties, aes(fill = AWATER)) +
+  geom_sf() +
+  scale_fill_distiller(palette = "YlGnBu", direction = 1) +
+  labs(title = "Total Area of Water in each Colorado County, 2021",
+       fill = "Total Area of Water",
+       caption = "Data source: 2021 5-year ACS, US Census Bureau") +
+  theme_void()
+```
+
+You can save `ggplot2` maps/plots either directly from the "Plots" viewing pane or with the `ggsave()` function, which allows for a little more customization in your figure output.
+
+```{r eval=FALSE}
+?ggsave
+```
+
+## Mapping with `tmap`
+
+We've already been using `tmap` to quickly view our results, but there are also a lot of ways to create custom cartographic products with this package.
+
+Set `tmap_mode()` to "plot" to make static maps.
+
+```{r}
+tmap_mode("plot")
+```
+
+The general structure of `tmap` maps is to first initialize the map with `tm_shape` supplied with the spatial object, and then the following function depends on what geometry or symbology you want. We are going to first map just our county polygons so will use the `tm_polygons()` function.
+
+```{r}
+tm_shape(counties) +
+  tm_polygons()
+```
+
+We can color polygons by a variable using the `col =` argument:
+
+```{r}
+tm_shape(counties) +
+  tm_polygons(col = "AWATER")
+```
+
+A difference we see between our `tmap` and `ggplot2` maps is that by default `tmap` uses a classified color scheme rather than a continuous once. By default `tmap` sets the classification based on the data range, here choosing intervals of 20 million (i.e, mln).
+
+Given this classified structure, say you also wanted to see the distribution of the raw values:
+
+```{r}
+hist(counties$AWATER)
+```
+
+We can manually change the classification of our map within the `tm_polygons()` function with the `style =` argument. Let's try using a quantile method, where each class contains the same number of counties. `tm_layout()` also offers a lot of options to customize the map layout. Here we remove the map frame and put the legend outside the map area.
+
+```{r}
+tm_shape(counties) +
+  tm_polygons(col = "AWATER",
+              palette = "Blues",
+              style = "quantile",
+              n = 6,
+              title = "Total Area of Water (m^2)")+
+  tm_layout(frame = FALSE,
+            legend.outside = TRUE)
+```
+
+Based on the quantile classification, we can see a little more heterogeneity now. We can even add our histogram of the data distribution to the plot too with `legend.hist = TRUE`.
+
+```{r}
+tm_shape(counties) +
+  tm_polygons(col = "AWATER",
+              palette = "Blues",
+              style = "quantile",
+              n = 6,
+              title = "Total Area of Water (m^2)",
+              legend.hist = TRUE)+
+  tm_layout(frame = FALSE,
+            legend.outside = TRUE,
+            legend.hist.width = 5)
+```
+
+`tmap` also has functions to add more customization like a compass, scale bar and map credits.
+
+```{r}
+tm_shape(counties) +
+  tm_polygons(col = "AWATER",
+              palette = "Blues",
+              style = "quantile",
+              n = 6,
+              title = "Total Area of Water (m^2)",
+              legend.hist = TRUE)+
+  tm_layout(frame = FALSE,
+            legend.outside = TRUE,
+            legend.hist.width = 5)+
+  tm_scale_bar(position = c("left", "bottom")) +
+  tm_compass(position = c("right", "top")) +
+  tm_credits("Map credit goes here", position = c("right", "bottom"))
+```
+
+You can save your maps with the `tmap_save()` function
+
+```{r eval=FALSE}
+?tmap_save
+```
+
+We can also view attributes as graduated symbols with `tm_bubbles()`
+
+```{r}
+tm_shape(counties) +
+  tm_polygons() +  # add base county boundaries
+  tm_bubbles(size = "AWATER",
+             col = "blue",
+             alpha = 0.5) +
+  tm_layout(legend.outside = TRUE,
+            legend.outside.position = "bottom")
+```
+
+Building off of this, we can view multiple attributes at once using polygon colors and graduated symbols. Say we want to color county by total population and add graduated symbols for total species occurrences per county.
+
+First: Calculate total species occurrences per county and add it as a new column to `counties`
+
+```{r}
+counties$species_count <- lengths(st_intersects(counties, occ))
+```
+
+```{r}
+tm_shape(counties) +
+  tm_polygons(col = "AWATER",
+              palette = "Blues",
+              style = "quantile", n = 6,
+              title = "Total Area of Water") +
+  tm_bubbles(size = "species_count",
+             col = "orange",
+             title.size = "Species Occurrences") +
+  tm_layout(frame = FALSE,
+            legend.outside = TRUE,
+            legend.outside.position = "right")
+```
+
+You can also add layers from multiple sf objects by calling a new `tm_shape:`
+
+```{r}
+tm_shape(counties) +
+  tm_polygons(col = "AWATER",
+              style = "quantile",
+              palette = "Greys",
+               n = 6,
+              title = "Total Area of Water") +
+tm_shape(occ) +
+  tm_symbols(col = "Species",
+             palette = "Dark2",
+             alpha = 0.8,
+             size = 0.5) +
+  tm_layout(frame = FALSE,
+            legend.outside = TRUE,
+            legend.outside.position = "right")
+```
+
+### `tmap` tips
+
+Can't decide on a color palette? `tmap` has a built in tool that allows you decide.
+
+```{r eval=FALSE}
+
+tmaptools::palette_explorer()
+```
+
+![](images/palette_explorer.png){width="457"}
+
+Want a cool `tmap` tip?
+
+```{r}
+tmap_tip()
+```
+
+### Faceting
+
+Want to compare across multiple variables? We can quickly do that with `tm_facets()` or by supplying a string of column names within `tm_polygons`, depending on the format of your data.
+
+Lets first compare across the area of water and total species occurrences, which are organized as different columns in `counties`
+
+```{r}
+tm_shape(counties) +
+  tm_polygons(c("AWATER", "species_count"),
+              style = "quantile", n = 5,
+              title = c("Total Water Area", "Total Species Occurrences"))+
+  tm_facets(ncol = 2) +
+  tm_layout(frame = FALSE)
+```
+
+Second, we can compare across values in one column by adding the `by =` argument to `tm_facets()`. Here let's make an individual map for each species.
+
+```{r}
+tm_shape(counties) +
+  tm_polygons() +
+tm_shape(occ) +
+  tm_facets(by = "Species", free.coords = FALSE) +
+  tm_symbols(col = "Species", palette = c("red", "yellow", "blue"),
+             alpha = 0.5) +
+  tm_layout(legend.show = FALSE)
+  
+```
+
+We can also make these facet maps interactive, and sync the zoom and scrolling across all facets with `sync = TRUE`
+
+```{r}
+tmap_mode("view")
+```
+
+```{r eval=FALSE}
+tm_shape(counties) +
+  tm_polygons() +
+tm_shape(occ) +
+  tm_facets(by = "Species", sync = TRUE) +
+  tm_dots(col = "Species", palette = c("red", "yellow", "blue"),
+             alpha = 0.5, size = 0.1, legend.show = FALSE)
+```
+
+A little clunky, but works better if you open it up to a full screen.
+
+## Animation
+
+Animations are a powerful (and fun!) visualization method when you have time series data. Our Snotel data includes daily snow depth values, so we can make an animation of observations over time.
+
+Let's go back to static plot mode:
+
+```{r}
+tmap_mode("plot")
+```
+
+Let's make an animation showing the change in snow depth at each of our SNOTEL sites in Larimer County for water year 2021.
+
+First filter the data to water year 2021:
+
+```{r}
+snotel_filtered <- snotel_data %>% 
+  filter(Date >= "2022-10-01")
+```
+
+We can make an animation with `tmap_animation()`. To do so we need to create a `tmap` object first, and must set the `nrow` and `ncol` to 1 within `tm_facets()`. We also set `free.coords = FALSE` which will keep the zoom level of the map constant across animation frames. We then supply this object and other animation settings to `tmap_animation()`.\
+
+```{r}
+larimer <- counties %>% 
+  filter(NAME == "Larimer")
+
+elevation_larimer <- terra::crop(elevation, larimer)
+
+ m1 <- tm_shape(elevation_larimer)+
+   tm_raster()+
+   tm_shape(snotel_filtered) +
+  tm_bubbles(size = "value")+
+   tm_layout(legend.position = c("right", "bottom"))+
+  tm_facets(along = "Date", free.coords = FALSE, free.scales.symbol.size = FALSE,
+            nrow = 1, ncol = 1)
+
+```
+
+```{r}
+#| eval: false
+tmap_animation(m1, filename = "data/snotel.gif", width = 1200, height = 600, delay = 15)
+```
+
+## Interactive Mapping
+
+Let's go back to interactive mode and walk through how to further use and customize interactive maps.
+
+```{r}
+tmap_mode("view")
+```
+
+From the previous maps it looks like some of the highest densities of species occurrences are in the Rocky Mountain National Park region. Lets make an interactive map, and add the park boundary to see if this is true.
+
+Note the `getBoundary()` script in this repo that contains a function to pull park boundary shapefiles (using the same IRMA API you used in Week 3!). Inspect that script and `source()` it into your session so you can use it to import the boundary shapefile for Rocky Mountain National Park (ROMO).
+
+```{r}
+ROMO <- getParkBoundary(park = 'ROMO')
+```
+
+Now lets make an interactive map of both the park boundary and the species occurrences.Note that `alpha` controls the transparency/opacity of layers, with a range of 0 (totally transparent) to 1 (non-transparent).
+
+```{r}
+tm_shape(ROMO) +
+  tm_polygons(alpha = 0.5, title = "Rocky Mountain National Park") +
+tm_shape(occ) +
+  tm_dots(col = "Species",
+            alpha = 0.75,
+             palette = "Dark2",
+             title = "Species Occurrences")
+```
+
+There definitely appears to be a lot of occurrences inside the park, but we also see a dense area of elk sightings in Estes Park just outside the park boundary.
+
+To improve the user experience, we can customize what content displays in the pop-up windows. Let's add some information associated with each species' occurrence.
+
+```{r}
+tm_shape(ROMO) +
+  tm_polygons(alpha = 0.5, title = "Rocky Mountain National Park") +
+  tm_shape(occ) +
+  tm_dots(
+    col = "Species",
+    palette = "Dark2",
+    title = "Species Occurrences",
+    popup.vars = c("Record Type" = "basisOfRecord",
+                   "Year" = "year",
+                   "Month" = "month")
+  )
+```
+
+## Exercise #1
+
+Use `extract` from the `terra` package to create a new column in the `occ` dataset that includes the elevation for each occurrence. Then edit the interactive map you just made above but add 'Elevation' to the popup.
+
+```{r}
+occ$forest_pct <- terra::extract(forest_pct, occ)[,2]
+
+```
+
+## More visualization packages to explore
+
+So far we have used `ggplot2` and `tmap` extensively. It is important to note there are many other spatial data visualization packages, but we wanted to reduce the amount of package installation required for this workshop. `tmap` is unique because of its breadth of functionality, like static and interactive mapping, animations, etc. Others worth investigating are [`mapview`](https://r-spatial.github.io/mapview/) , [`leaflet`](https://rstudio.github.io/leaflet/) and [`plotly`](https://plotly.com/r/) for interactive visualizations.
+
+### `plotly`
+
+In Week 3 you used `plotly` alongside `ggplot` to create interactive charts. You can also use `plotly` on its own to generate interactive charts (with some more functionality).
+
+For example, here is a plot showing show depth across time for each SNOTEL site in Larimer County. Notice that you can turn sites on/off by clicking its name in the legend.
+
+```{r}
+plot_ly(snotel_data) %>% 
+  add_trace(x =snotel_data$Date,
+            y = snotel_data$value,
+            name = ~snotel_data$Name,
+            linetype = ~snotel_data$Name,
+            type = "scatter",
+            mode = "lines+markers") %>% 
+  layout(yaxis = list(title = "Snow Depth (in)"))
+```
+
+## Exercise #2
+
+Use the `unit_visitation()` function you created in Week 3 to import visitation data for Death Valley (DEVA), Joshua Tree (JOTR), Mojave (MOJA), Bryce Canyon (BRCA) and Zion (ZION) parks from 1980 to 2021. Second, use the `getBoundary()` function to import the park boundaries from DEVA, JOTR, and MOJA.
+
+First, create an interactive time series plot of visitation for all three parks (in the same plot) from 1980 - 2021. Show the total number of Recreation Visitors per year in each park.
+
+Second, join your visitation data to the park boundary data and create a map where each park polygon is colored by their visitation data for the year 2021. Use a continuous color scale and add a legend (this can be interactive or static).
+
+```{r}
+unit_visitation <- function(unit_Codes, startMonth, startYear, endMonth, endYear) {
+
+raw_data_UV <- httr::GET(url = paste0("https://irmaservices.nps.gov/v3/rest/stats/visitation?unitCodes=", unit_Codes, "&startMonth=", startMonth, "&startYear=", startYear, "&endMonth=", endMonth, "&endYear=", endYear))
+
+# convert content to text
+extracted_data_UV <- httr::content(raw_data_UV, as = "text", encoding = "UTF-8") 
+
+# parse text from JSON to data frame
+final_data_UV <- jsonlite::fromJSON(extracted_data_UV)
+
+return(final_data_UV)
+
+}
+
+unit_visitation("ROMO", 01, 2010, 12, 2021)
+```
+
+## Exercise #3
+
+Using what you learned today and the data sets imported/created so far (or your own data!!) create your own unique spatial data visualization. It can be static, interactive, animated, whatever interests you the most and puts your visualization skills to the test.
+
+<!--chapter:end:4.3_spatial-viz.Rmd-->
+
+---
+title: "Tidying Public Water Quality Data"
+author: "YEZZEN K"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output: 
+  html_document:
+    toc:  yes
+    toc_depth:  3
+    toc_float: true
+editor_options: 
+  chunk_output_type: console
+always_allow_html: true
+---
+
+```{r chapter-title-11, include=FALSE}
+toc.title <- "Chapter 5.1: Tidying Public Water Quality Data"
+```
+
+# Why public datasets?
+
+Working with large, open-access data sets can serve many purposes. It can be an excellent way to explore new ideas, before investing in field-work or experiments. It can be a great way to take local or experimental results and expand them to different ecosystems, places, or landscapes. Or it can be an excellent way to build, validate, and test ecological models on regional or national scales.
+
+So why doesn't everyone use public data? Well, it's often collected by a variety of organizations, with different methods, units, and innconsistent metadata. Together these issues make large public data sets "messy." Messy data can be messy in many different ways, but at the basic level it means that data is hard to analyze; not because the data itself is bad, but because the way it is organized is unclear or inconsistent.
+
+In this lab, we will learn some tricks to "tidying" data, making it analysis-ready. We will depend heavily on the [tidyverse](https://www.tidyverse.org/), an excellent series of packages that make data manipulation beautiful and easy. We will also be working with water quality portal data so we will also use the excellent [dataRetrieval](https://github.com/USGS-R/dataRetrieval) package for downloading data from the Water Quality Portal and the USGS.
+
+## Loading key packages
+
+This lesson is meant to introduce the incredible variety of tools that one can use to clean data, many of these tools are captured by the `tidyverse` meta-package, a package of packages, but there are some additional ones that will help us locate our various water quality sites.
+
+```{r setup-9, warnings='hide',message=FALSE}
+library(tidyverse) #Package with dplyr, tibble, readr, and others to help clean coding
+library(dataRetrieval) #Package to download data. 
+library(sf) #Geospatial package to plot and explore data
+library(mapview) #Simple interface to leaflet interactive maps
+library(broom) #Simplifies model outputs
+library(knitr) #Makes nice tables
+library(kableExtra) #Makes even nicer tables
+library(lubridate) #Makes working with dates easier
+library(ggthemes) #Makes plots prettier
+library(tidyr) #Makes multiple simultaneous models easier
+
+#Move the directory to the top folder level; DONT RUN THIS!!
+#knitr::opts_knit$set(root.dir='..')
+```
+
+# Downloading data
+
+For this lab, we'll explore water quality data in the Colorado River basin as it moves from Colorado to Arizona. All data will be generated through the code you see below, with the only external information coming from knowing the SiteID's for the monitoring locations along the Colorado River and the water quality characteristic names.
+
+The water quality portal can be accessed with the command `readWQPdata`, which takes a variety of parameters (like startdate, enddate, constituents, etc...). We'll generate these rules for downloading the data here.
+
+## Download prep
+
+```{r download-prep}
+# First we'll make a tibble (a tidyverse table) with Site IDs. Generally these are increasingly downstream of the CO headwaters near Grand Lake. 
+colorado <- tibble(sites=c('USGS-09034500', 'USGS-09069000',
+                           'USGS-09085000', 'USGS-09095500', 'USGS-09152500'),
+                   basin=c('colorado1', 'eagle',
+                           'roaring', 'colorado3', 'gunnison'))
+
+# Now we need to setup a series of rules for downloading data from the Water Quality Portal. 
+# We'll focus on cation and anion data from 1950-present. Each cation has a name that we might 
+# typically use like calcium or sulfate, but the name may be different in the water quality
+# portal, so we have to check this website https://www.waterqualitydata.us/Codes/Characteristicname?mimeType=xml 
+# to get our names correct. 
+
+paramater.names <- c('ca', 'mg', 'na', 'k', 'so4', 'cl', 'hco3')
+
+ca <- 'Calcium'
+mg <- 'Magnesium'
+na <- 'Sodium'
+k <- 'Potassium'
+so4 <- c('Sulfate', 'Sulfate as SO4', 'Sulfur Sulfate', 'Total Sulfate')
+cl <- 'Chloride'
+hco3 <- c('Alkalinity, bicarbonate', 'Bicarbonate')
+
+# Compile all these names into a single list
+parameters <- list(ca, mg, na, k, so4, cl, hco3)
+
+# Name each cation or anion in the list
+names(parameters) <- paramater.names
+
+# Notice that we aren't downloading any nutrients (P or N) because they are much messier (100s of different ways to measure and report concentration 
+# data) than other cation anion data. 
+
+# Start dates
+start <- '1980-10-01'
+end <- '2023-01-01'
+
+# Sample media (no sediment samples)
+sampleMedia = 'Water'
+
+# Compile all this information into a list with arguments
+site.args <- list(siteid = colorado$sites,
+                  sampleMedia = sampleMedia,
+                  startDateLo = start,
+                  startDateHi = end,
+                  characteristicName = NA) # We'll fill this in later in a loop
+```
+
+## Concentration data download
+
+Now that we have generated the commands to download the data, the code to download the data is here, but it is not run on purpose because it takes 15 minutes or so to run every time. You can always run it yourself by setting `eval = T`.
+
+```{r concentration download-1}
+conc.list <- list() # Empty list to hold each data download
+
+# We'll loop over each anion or cation and download all data at our sites for that constituent
+for(i in 1:length(parameters)){
+  
+  # We need to rename the characteristicName (constituent) each time we go through the loop
+  site.args$characteristicName <- parameters[[i]] 
+  
+  # readWQPdata takes in our site.args list and downloads the data according to those rules 
+  # time, constituent, site, etc...
+  
+  # Don't forget about pipes "%>%"! Pipes pass forward the results of a previous command, so that 
+  # you don't have to constantly rename variables. I love them. 
+  
+  conc.list[[i]] <- readWQPdata(site.args) %>%
+    mutate(parameter = names(parameters)[i]) #Mutate just adds a new column to the data frame
+  
+  # Pipes make the above command simple and succinct versus something more complicated like:
+  # conc.list[[i]] <- readWQPdata(site.args)
+  # conc.list[[i]]$parameter <- names(parameters)[i]
+
+}
+
+conc.long <- conc.list %>% bind_rows()
+```
+
+# Data tidying
+
+Now that we have downloaded the data, we need to tidy it up. The water quality portal data comes with an incredible amount of metadata in the form of extra columns, but we don't need all this extra data.
+
+Look at the data you downloaded:
+
+```{r conc data-1}
+# 
+head(conc.long) %>%
+  kable(.,'html') %>%
+  kable_styling() %>%
+  scroll_box(width = '800px',height = '300px')
+
+```
+
+## Initial cleaning up
+
+Wow, that looks messy! Lots of extraneous columns, lots of NAs, so much information we can hardly parse it. Let's pare it down to the essentials.
+
+```{r tidying up concentration-1}
+# This code mostly just grabs and renames the most important data columns
+conc.clean <-  conc.long %>%
+  dplyr::select(date = ActivityStartDate,
+                parameter = CharacteristicName,
+                units = ResultMeasure.MeasureUnitCode,
+                SiteID = MonitoringLocationIdentifier,
+                org = OrganizationFormalName,
+                org_id = OrganizationIdentifier,
+                time = ActivityStartTime.Time,
+                value = ResultMeasureValue,
+                sample_method = SampleCollectionMethod.MethodName,
+                analytical_method = ResultAnalyticalMethod.MethodName,
+                particle_size = ResultParticleSizeBasisText,
+                date_time = ActivityStartDateTime,
+                media = ActivityMediaName,
+                sample_depth = ActivityDepthHeightMeasure.MeasureValue,
+                sample_depth_unit = ActivityDepthHeightMeasure.MeasureUnitCode,
+                fraction = ResultSampleFractionText,
+                status = ResultStatusIdentifier) %>%
+  # Remove trailing white space in labels
+  mutate(units  =  trimws(units)) %>%
+  # Keep only samples that are water samples
+  filter(media == 'Water') 
+
+```
+
+Now let's look at the tidier version:
+
+```{r examine tidier data-1}
+head(conc.clean) %>%
+  kable(.,'html') %>%
+  kable_styling() %>%
+  scroll_box(width = '800px', height = '300px')
+site_info <- attr(conc.clean, 'siteInfo')
+```
+
+## Final tidy dataset
+
+Okay, that is getting better, but we still have lots of extraneous information. For our purposes, let's assume that the sample and analytical methods used by the USGS are reasonable and exchangeable (one method is equivalent to the other). If we make that assumption then the only remaining tidying step left is to make sure that all the data is in the same units.
+
+### Unit Check
+
+```{r unit check-1}
+table(conc.clean$units)
+```
+
+Wow! Almost all the data is in mg/L. That makes our job really easy.
+
+We just need to remove these observations with a `dplyr::filter()` call and then select an even smaller subset of useful columns, while adding a time object column using the `lubridate::ymd()` call.
+
+```{r tidy-1}
+conc.tidy <- conc.clean %>% 
+  filter(units == 'mg/l') %>%
+  # ymd() converts characters into YYYY-MM-DD date formatting:
+  mutate(date = lubridate::ymd(date)) %>%
+  dplyr::select(date,
+         parameter,
+         SiteID,
+         conc=value)
+```
+
+### Daily data
+
+Now we have a manageable data frame. But how do we want to organize the data? Since we are looking at a really long time-series of data (70 years), let's look at data as a daily average. The `dplyr::group_by()` and `dplyr::summarize()` commands make this really easy:
+
+```{r daily-1}
+# The amazing group_by function groups all the data so that the summary
+# only applies to each subgroup (site, date, and parameter combination).
+# So in the end you get a daily average concentratino for each site and parameter type. 
+conc.daily <- conc.tidy %>%
+  group_by(date, parameter, SiteID) %>% 
+  summarize(conc = mean(conc, na.rm = T))
+```
+
+Taking daily averages looks like it eliminated `r nrow(conc.tidy) - nrow(conc.daily)` observations, meaning these site-date combinations had multiple observations on the same day.
+
+# Assignment!
+
+Let's imagine you wanted to add data for your water quality analyses, but you also know that you need to do this analysis over and over again. Let's walk through how we would: 1) Add new data to our `conc.clean` data set, and 2) how to write a function to download, clean, and update our data with far less code.
+
+## Question 1.
+
+Write a function that can repeat the above steps with a single function call. This function should take in a single tibble that is identical in structure to the `colorado` one above (e.g. it has columns named `sites`, and `basin`). The function should then take in that tibble and be able to download and clean the data to make the data structure/outcomes exactly like `conc.daily`. Use this function to download data for the three sites listed below.
+
+```{r}
+### THE FUNCTION
+
+q1_function <- function(additional_data){
+  #additional_data <- tibble(sites = c('USGS-09180000', 'USGS-09180500', 'USGS-09380000'),
+                         #basin_q1 = c('dolores', 'colorado4', 'colorado5'))
+  
+    # Now we need to setup a series of rules for downloading data from the Water Quality Portal. 
+# We'll focus on cation and anion data from 1950-present. Each cation has a name that we might 
+# typically use like calcium or sulfate, but the name may be different in the water quality
+# portal, so we have to check this website https://www.waterqualitydata.us/Codes/Characteristicname?mimeType=xml 
+# to get our names correct. 
+
+paramater_names <- c('ca', 'mg', 'na', 'k', 'so4', 'cl', 'hco3')
+
+ca <- 'Calcium'
+mg <- 'Magnesium'
+na <- 'Sodium'
+k <- 'Potassium'
+so4 <- c('Sulfate', 'Sulfate as SO4', 'Sulfur Sulfate', 'Total Sulfate')
+cl <- 'Chloride'
+hco3 <- c('Alkalinity, bicarbonate', 'Bicarbonate')
+
+# Compile all these names into a single list
+parameters <- list(ca, mg, na, k, so4, cl, hco3)
+
+# Name each cation or anion in the list
+names(parameters) <- paramater_names
+
+# Notice that we aren't downloading any nutrients (P or N) because they are much messier (100s of different ways to measure and report concentration 
+# data) than other cation anion data. 
+
+  
+# Start dates
+start <- '1980-10-01'
+end <- '2023-01-01'
+
+# Sample media (no sediment samples)
+sampleMedia = 'Water'
+
+# Compile all this information into a list with arguments
+site_args_q1 <- list(siteid = additional_data$sites, # changed to work for current function
+                  sampleMedia = sampleMedia,
+                  startDateLo = start,
+                  startDateHi = end,
+                  characteristicName = NA) # We'll fill this in later in a loop
+
+conc_list_q1 <- list() # Empty list to hold each data download
+
+# We'll loop over each anion or cation and download all data at our sites for that constituent
+for(i in 1:length(parameters)){
+  
+  # We need to rename the characteristicName (constituent) each time we go through the loop
+  site_args_q1$characteristicName <- parameters[[i]] 
+  
+  # readWQPdata takes in our site.args list and downloads the data according to those rules 
+  # time, constituent, site, etc...
+  
+  # Don't forget about pipes "%>%"! Pipes pass forward the results of a previous command, so that 
+  # you don't have to constantly rename variables. I love them. 
+  
+  conc_list_q1[[i]] <- readWQPdata(site_args_q1) %>%
+    mutate(parameter = names(parameters)[i]) #Mutate just adds a new column to the data frame
+  
+  # Pipes make the above command simple and succinct versus something more complicated like:
+  # conc.list[[i]] <- readWQPdata(site.args)
+  # conc.list[[i]]$parameter <- names(parameters)[i]
+
+}
+
+conc_long_q1 <- conc_list_q1 %>% bind_rows()
+
+### DATA TIDYING - DELETE?
+head(conc_long_q1) %>%
+  kable(.,'html') %>%
+  kable_styling() %>%
+  scroll_box(width = '800px',height = '300px')
+
+### Initial Cleaning Up
+
+conc_clean_q1 <-  conc_long_q1 %>%
+  dplyr::select(date = ActivityStartDate,
+                parameter = CharacteristicName,
+                units = ResultMeasure.MeasureUnitCode,
+                SiteID = MonitoringLocationIdentifier,
+                org = OrganizationFormalName,
+                org_id = OrganizationIdentifier,
+                time = ActivityStartTime.Time,
+                value = ResultMeasureValue,
+                sample_method = SampleCollectionMethod.MethodName,
+                analytical_method = ResultAnalyticalMethod.MethodName,
+                particle_size = ResultParticleSizeBasisText,
+                date_time = ActivityStartDateTime,
+                media = ActivityMediaName,
+                sample_depth = ActivityDepthHeightMeasure.MeasureValue,
+                sample_depth_unit = ActivityDepthHeightMeasure.MeasureUnitCode,
+                fraction = ResultSampleFractionText,
+                status = ResultStatusIdentifier) %>%
+  # Remove trailing white space in labels
+  mutate(units  =  trimws(units)) %>%
+  # Keep only samples that are water samples
+  filter(media == 'Water') 
+
+### Examine Tidier Data
+head(conc_clean_q1) %>%
+  kable(.,'html') %>%
+  kable_styling() %>%
+  scroll_box(width = '800px', height = '300px')
+site_info <- attr(conc_clean_q1, 'siteInfo')
+
+### Unit Check
+table(conc_clean_q1$units)
+
+conc_tidy_q1 <- conc_clean_q1 %>% 
+  filter(units == 'mg/l') %>%
+  # ymd() converts characters into YYYY-MM-DD date formatting:
+  mutate(date = lubridate::ymd(date)) %>%
+  dplyr::select(date,
+         parameter,
+         SiteID,
+         conc=value)
+
+### Daily Data
+
+conc_daily_q1 <- conc_tidy_q1 %>%
+  group_by(date, parameter, SiteID) %>% 
+  summarize(conc = mean(conc, na.rm = T))
+
+return(view(conc_daily_q1))
+
+}
+additional_data <- tibble(sites = c('USGS-09180000', 'USGS-09180500', 'USGS-09380000'),
+                          basin_q1 = c('dolores', 'colorado4', 'colorado5'))
+
+q1_function(additional_data)
+
+
+```
+
+## Question 2.
+
+Append the new data that the above function returned to `conc.daily` using `bind_rows()`. (Remember, this new data should be identical in structure to the `conc.daily` data set). Save this new data set as `tidied_full_wq.RData` using the `save()` function.
+
+```{r}
+wq <- dplyr::bind_rows(conc.daily, q1_function(additional_data))
+view(wq)
+
+save(wq, file = 'tidied_full_wq.RData')
+```
+
+## Question 3
+
+We now have a dataset of stream water quality data for 9 sites throughout Colorado. However, one potential control on stream chemistry is stream discharge. One function that can allow you to easily download discharge data is `readNWISdv()` from the `dataRetrieval` package. Use this function to download daily discharge data for all eight of the sites you've already worked with above. Save this data as `data/Q.RData`. The site numbers are the same as what we used above, but you need to remove `USGS-` from each site. Reminder, discharge is `00060` for the `parameterCd` argument. Moreover, we can use `renameNWISColumns()` to automatically make the column names a little less annoying.
+
+```{r}
+# Reminder! you can use ?readNWISdv to read about how the function works. 
+sites <- 
+  # Bind the two datasets to get all 8 sites
+  bind_rows(colorado, additional_data) %>%
+  # Grab just the column labeled sites
+  pull(sites) %>%
+  # Remove the USGS- prefix
+  gsub('USGS-', '', .)
+
+#PUT ADDITIONAL CODING STEPS HERE
+
+# pulls USGS daily ('dv') stream flow data:
+q_data <- dataRetrieval::readNWISdv(siteNumbers = c("09034500", "09069000", "09085000", "09095500", "09152500", "09180000", "09180500", "09380000"), 
+                               parameterCd = "00060", # USGS code for stream flow
+                               startDate = "1980-10-01", # YYYY-MM-DD formatting
+                               endDate = "2023-01-01") %>% # YYYY-MM-DD formatting
+  rename(q_cfs = X_00060_00003) %>% # USGS code for stream flow units in cubic feet per second (CFS)
+  mutate(Date = lubridate::ymd(Date)) # convert the Date column to "Date" formatting using the `lubridate` package
+         #Site = case_when(site_no == "06752260" ~ "Lincoln", 
+                          #site_no == "06752280" ~ "Boxelder"))
+save(q_data, file = 'Q.Rdata')
+```
+
+<!--chapter:end:5.1_Tidying_WQ_data.Rmd-->
+
+---
+title: "Modelling Public Water Quality Data"
+author: "Yezzen K"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output: 
+  html_document:
+    toc:  yes
+    toc_depth:  3
+    toc_float: true
+editor_options: 
+  chunk_output_type: console
+always_allow_html: true
+---
+
+```{r chapter-title-12, include=FALSE}
+toc.title <- "Chapter 5.2: Modelling Public Water Quality Data"
+```
+
+# Final data prep
+
+We have a 'tidy' data set from our previous work that includes both discharge data and concentration data. Let's look it! But first, where is the data?
+
+```{r setup-10, warnings = 'hide', message = FALSE}
+library(tidyverse) # Package with dplyr, tibble, readr, and others to help clean coding
+library(dataRetrieval) # Package to download data. 
+library(sf) # Geospatial package to plot and explore data
+library(mapview) # Simple interface to leaflet interactive maps
+library(broom) # Simplifies model outputs
+library(knitr) # Makes nice tables
+library(kableExtra) # Makes even nicer tables
+library(lubridate) # Makes working with dates easier
+library(ggthemes) # Makes plots prettier
+library(tidyr) # Makes multiple simultaneous models easier
+library(trend) # Allows us to explore trends. 
+```
+
+## Data load
+
+```{r data readin}
+load('Q.RData')
+load('tidied_full_wq.RData')
+
+## Site info so we can use names rather than long site codes
+colorado <- tibble(SiteID = c('USGS-09034500', 'USGS-09069000',
+                           'USGS-09085000','USGS-09095500', 'USGS-09152500'),
+                   basin = c('colorado1', 'eagle',
+                           'roaring', 'colorado3', 'gunnison')) %>%
+  bind_rows(tibble(SiteID = c('USGS-09180000', 'USGS-09180500', 'USGS-09380000'),
+                          basin = c('dolores', 'colorado4', 'colorado5'))
+)
+
+# Grab the basin name
+wq <- wq %>%
+  inner_join(colorado)
+```
+
+## Site info extraction
+
+With all our data transformations in the previous .Rmd we lost a lot of the metadata for each site. We need to re-download this data using `whatWQPdata()`
+
+```{r}
+site_info <- whatWQPsites(siteid = unique(wq$SiteID)) %>%
+  dplyr::select(SiteID = MonitoringLocationIdentifier,
+                  name = MonitoringLocationName,
+                  area = DrainageAreaMeasure.MeasureValue,
+                  area.units = DrainageAreaMeasure.MeasureUnitCode,
+                  elev = VerticalMeasure.MeasureValue,
+                  elev_units = VerticalMeasure.MeasureUnitCode,
+                  lat = LatitudeMeasure,
+                  long = LongitudeMeasure) %>%
+  distinct() %>%  # Distinct without any arguments just keeps the first of any duplicates rows 
+  # join this data to our `colorado` object to get the `basin` column:
+  inner_join(colorado) # join the data to colorado
+```
+
+### Map
+
+Here we use the `sf` package to project the site information data into a GIS type data object called a `simple feature (sf)`. The function `st_as_sf` converts the longitude (x) and latitude (y) coordinates into a projected point feature with the EPSG code 4326 (WGS 84). (See Lesson 1 and Lesson 4 for a more detailed explanation.) We can then use the `mapview` package and function to look at where these sites are.
+
+```{r}
+# convert site info as an sf object
+site_sf <- site_info %>%
+  st_as_sf(.,coords = c('long', 'lat'), crs = 4326) # convert long, lat to spatial object
+
+mapview(site_sf)
+```
+
+So these sites are generally in the Colorado River Basin with increasing size.
+
+# Modelling Data
+
+## Trend detection?
+
+Now that we know where the data is coming from and we are happy with what it looks like, let's start modelling! The first question we might want to explore is: **Are concentrations of elements changing over time?**. Let's first focus on calcium in the Dolores River. As with all data work, the first thing you should do is look at our data.
+
+```{r}
+dolores_ca <- wq %>%
+  filter(basin == 'dolores', parameter == 'Calcium')  # is the dolores river over the years changing in its Ca concentration
+
+ggplot(dolores_ca, aes(x = date, y = conc)) + 
+  geom_point()
+```
+
+## Adding a trend line with ggplot
+
+`ggplot()` has an easy method for adding a trend line to plots (`stat_smooth`()). The code below uses a linear model (lm) to fit the line:
+
+```{r}
+
+ggplot(dolores_ca, aes(x = date, y = conc)) + 
+  geom_point() + 
+  stat_smooth(method = 'lm') # the line that you add is the linear model
+# minimizing the distance between the line and all the points in aggregate (it's what linear models do)
+
+
+```
+
+That line looks pretty flat!
+
+### Linear models for trend detection (the wrong way).
+
+A very intuitive way to try to detect if there is a long term trend is to use linear models, as `ggplot()` does. So, let's go ahead and write out a model for daily calcium data using the `lm()` function. This class won't do a great job defining when you can use linear models, but this is one of the main functions that you will use. Your stats classes should give you more background on how to use `lm()` appropriately.
+
+```{r}
+ca_model <- lm(conc ~ date, data = dolores_ca) # concentration as a function of date
+summary(ca_model) # tells us the formula to run the model and the residuals. Big numbers mean bad fit. 
+# You want to look at:
+# - R^2
+# - Adjusted R^2
+# - p-value
+# NEVER USE LINEAR MODELS FOR TRENDS, YOU CANNOT USE LINEAR MODELS FOR TREND DETECTING
+# Instead we should use Mann-Kendall tests and Tau's Sens Slope
+```
+
+### The right way!
+
+Using a linear model for trend detection breaks one of the cardinal rules of linear modelling, namely that each observation is assumed to be independent of any other observation. In a time-series like what we are looking at here, yesterday's calcium concentration is highly correlated with today's concentration. So linear models should never be used in trend detection. Instead we should use Mann-Kendall tests and Tau's Sens Slope.
+
+#### Mann-Kendall test
+
+The Mann Kendall test is a non-parametric test of trends, you can use `?mk.test` to read more about the method, but it only requires an ordered time-series to run. Let's use it here.
+
+```{r}
+dolores_ca <- dolores_ca %>%
+  # Make sure data is arranged from 1980 onward. 
+  arrange(date)
+
+dolores_mk <- mk.test(dolores_ca$conc)
+
+print(dolores_mk) # we should get the tau sen's slope output: we should see that Ca is not really changing over time
+```
+
+The mk.test is really just a true/false where if the p-value is below some threshold (usually 0.05) then you can be mostly confident that there is a 'real' trend in the data. However it doesn't tell you the slope of that trend. For that you need to use `sens.slope()`.
+
+```{r}
+dolores_slope <- sens.slope(dolores_ca$conc)
+
+dolores_slope
+```
+
+Notice that `sens.slope()` gives you a slope value, and a p-value (which is the same as an MK test). For this reason, I almost always just use `sens.slope()` so I get both significance and slope.
+
+#### Cleaner output
+
+The output from these models is kind of messy if you are printing lots of model results. We can use the `tidy()` function from the `broom` package to clean up this output.
+
+```{r}
+tidy(dolores_slope)
+```
+
+Some model objects don't include both the p-value and the slope, which is slightly maddening, but we can make our own function to do this.
+
+```{r}
+tidier <- function(mod = dolores_slope){
+  
+  tidy(mod) %>%
+    mutate(slope = mod$estimates) # adds a new column that stores slopes as 'estimates'
+  # be careful that you're putting down the slope and not the intercepts
+  
+}
+
+tidier(mod = dolores_slope)
+```
+
+Ok, now we have an elaborate way to confirm what the plot already showed us. There is no long-term trend in calcium concentrations in the Dolores River.
+
+# Models everywhere!
+
+Okay so we have already figured out how to model data at a single site for a single parameter, but is there an efficient way to do this for ALL sites and ALL parameters?
+
+**YES!**
+
+I'm glad you asked. We will use the magic of `nesting` data to apply our trend models to all our data. First let's alter the data a little to increase precision in our question.
+
+### Converting data to late summer annual means
+
+Water chemistry is heavily controlled by seasonality and water flow, so let's try to control for that and summarize our data to only include the low-flow periods of the year. Basically we will be focusing on: **are there trends in low flow concentrations of ions in the stream?**
+
+```{r}
+low_flow <- wq %>%
+  mutate(month = lubridate::month(date),
+         year = lubridate::year(date)) %>%
+  filter(month %in% c(8,9,10,11)) %>%
+  group_by(basin, SiteID, parameter, year) %>%
+  summarize(conc = median(conc, na.xrm = T))
+
+ggplot(low_flow, aes(x = year, y = conc, color = basin)) + 
+  facet_wrap(~parameter, scales = 'free') + 
+  geom_point() + 
+  theme_few() + 
+  scale_y_log10() + 
+  scale_color_hc() + 
+  theme(legend.pos = c(0.7,0.2),
+        legend.direction = 'horizontal') +
+  ylab('Concentration (mg/l)')
+```
+
+## The Magic of Nesting
+
+Okay, so now we have a few things:
+
+1.  A dataset that has the data organized the way we want it.
+
+2.  A function (`sens.slope()`) we can use to look at if there are long-term trends in concentration.
+
+3.  A desire to apply this function to all of our sites and parameters.
+
+To accomplish **3** we need to use the magic of `nest()`. Nesting allows us to group data by site and parameter (like with a `group_by` and a `summarize`) and apply models to each site and parameter separately. Effectively nesting bundles (or nests!) the data into tidy little packets that we can apply the model to. Let's try!
+
+### Nesting data
+
+```{r}
+low_nest <- low_flow %>%
+  # rename parameter as ion to make it more clear
+  group_by(ion = parameter,basin) %>%
+  nest() 
+
+head(low_nest)
+```
+
+The above code produces a tibble with three columns: `basin`, `parameter`, and `data`. The `data` column is our nested data (or 'bundled' data, as I like to think of it) for each basin-parameter combination.
+
+### Modelling over nested data
+
+Now we just need to apply our model to the data. To do this we need to use the `map()` function. Map takes in an x (here, our `data` column) and then a function (in this case `sens.slope()`). We use `.x$conc` to indicate that we want to apply the model to the concentration column within each bundled (nested) data frame.
+
+```{r}
+wq_models <- low_nest %>%
+  mutate(mods = map(data, ~ sens.slope(.x$conc))) # This part is very critical. The function to call the column with all of the tibble data is .x (.x is the nested data), and it looks for all the conc data within the nested dataset. 
+
+head(wq_models)
+```
+
+Now we have a nested data set AND nested models (that are hard to see). We can look at a single model by indexing it.
+
+```{r}
+# This provides the 15th model summary
+wq_models$mods[15] # go into the water quality models, go to the 15th one and give me its output.
+```
+
+But that is a tedious way to look at our model summaries!
+
+So now let's use the power of our `tidier()` function and `unnest()`. Again, we use `map()` to apply our `tidier()` function to all of the raw `sens.slope` models, and we extract p.value and slope in a clean table. We then use `unnest()` to unravel that data so we have a final data frame that contains all of the model outputs.
+
+```{r}
+wq_mod_summaries <- wq_models %>%
+  mutate(tidy_mods = map(mods, tidier)) %>% # make a new model called tidy_mods, and maps the mods to the tidier dataset
+  unnest(tidy_mods) %>%
+  dplyr::select(basin, ion, p.value, slope) %>%
+  mutate(trend = ifelse(p.value < 0.01, 'yes', 'no')) # we run it on such a low p-value to avoid getting false positives (bon feroni correction)
+
+head(wq_mod_summaries)
+```
+
+### Visualizing model output.
+
+```{r}
+ggplot(wq_mod_summaries,aes(x = ion, y = slope, color = trend)) + 
+  geom_point() + 
+  facet_wrap(~basin,scales = 'free') + 
+  theme_few() + 
+  scale_color_manual(values = c('black','green3')) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.pos = c(0.8, 0.1))
+```
+
+# Assignment
+
+The above workflow really focuses on trend detection, but we want to focus some on actual linear models. As such we want to join our discharge (Q) data to our water quality (WQ) data and we want to look at the relationship between Q and WQ.
+
+## Join discharge and water quality data.
+
+Use `inner_join()` to join our discharge data to our water quality data. You want to join by both date and siteid. Remember! the discharge data has ids that drop the `USGS-` so you will need to add that back in using a `paste()`.
+
+```{r}
+# make sure you join by site AND date
+# mutate siteID 
+# rename
+
+# Add "USGS-" prefix to site column in discharge data
+usgs_q_data <- q_data %>%
+  mutate(site_no = paste("USGS-", site_no, sep = "")) %>%
+  rename(SiteID = site_no) %>%
+  rename(date = Date)
+
+# Inner join by date and site ID
+joined_data <- inner_join(wq, usgs_q_data, by = c("SiteID", "date"))
+```
+
+Pick any site and ion combination and plot Q versus concentration. What do you see in this relationship?
+
+```{r}
+gunnison_ca <- joined_data %>%
+  filter(basin == 'gunnison', parameter == 'Calcium')  # is the gunnison river over the years changing in its Ca concentration
+
+ggplot(gunnison_ca, aes(x = q_cfs, y = conc)) + 
+  geom_point()
+
+### There is a negative logarithmic relationship between calcium concentrations and river flow speed
+```
+
+Group your data by basin and ion and nest the data, use the `head()` function to print the first several rows of your nested data
+
+```{r}
+gunnison_mk <- mk.test(gunnison_ca$conc)
+
+basin_ion_nest <- joined_data %>%
+  # rename parameter as ion to make it more clear
+  group_by(ion = parameter,basin) %>%
+  nest() 
+
+head(basin_ion_nest)
+```
+
+## Apply a linear model to the data.
+
+You will need to use a `map()` command like this: `map(data, ~lm(conc ~ q, data = .x))`
+
+```{r}
+joined_models <- basin_ion_nest %>%
+  mutate(mods = map(data, ~lm(conc ~ q_cfs, data = .x))) # This part is very critical. The function to call the column with all of the tibble data is .x (.x is the nested data), and it looks for all the conc data within the nested dataset. 
+
+head(joined_models)
+```
+
+Summarize your data using `tidy()`. You should have a new column called `mods` or something similar and you need to "tidy" those mods.
+
+```{r}
+tidy_joined_models <- joined_models %>%
+  mutate(tidy_mods = map(mods, ~broom::tidy(.x))) %>%
+  unnest(tidy_mods) %>%
+  filter(term == "q_cfs") %>%
+  dplyr::select(basin, ion, p.value, slope = estimate) %>%
+  mutate(trend = ifelse(p.value < 0.01, 'yes', 'no'))
+head(tidy_joined_models)
+
+```
+
+## Visualize the data.
+
+Make a visual of your model summaries that shows a) which sites have significant relationships between discharge and concentration, and b) the slope of that relationship.
+
+```{r}
+joined_mod_summaries <- wq_models %>%
+  mutate(tidy_mods = map(mods, tidier)) %>% # make a new model called tidy_mods, and maps the mods to the tidier dataset
+  unnest(tidy_mods) %>%
+  dplyr::select(basin, ion, p.value, slope) %>%
+  mutate(trend = ifelse(p.value < 0.01, 'yes', 'no')) # we run it on such a low p-value to avoid getting false positives (bon feroni correction)
+
+head(wq_mod_summaries)
+```
+
+```{r}
+ggplot(joined_mod_summaries,aes(x = ion, y = slope, color = trend)) + 
+  geom_point() + 
+  facet_wrap(~basin,scales = 'free') + 
+  theme_few() + 
+  scale_color_manual(values = c('black','green3')) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.pos = c(0.8, 0.1))
+```
+
+## Bonus
+
+Look up the `furrr` package. What does `furrr::map()` do that is different from `purrr::map()`?
+
+When would you want to use this `furrr::` function instead of `purrr::`?
+
+**You'd want to use the furrr:: function when dealing with an exceptionally large dataset or with computationally intensive code, because it runs functions in parallel (or in chunks/clusters), significantly reducing computation time and increasing efficiency.**
+
+<!--chapter:end:5.2_Modelling_WQ_data.Rmd-->
+
